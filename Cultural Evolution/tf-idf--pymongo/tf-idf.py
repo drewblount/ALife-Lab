@@ -12,6 +12,20 @@ fnLog = 'tf-idf.log'
 logFormat = "%(asctime)s %(levelname)s %(processName)s\t%(message)s"
 logging.basicConfig(filename=fnLog, level=logging.NOTSET, format = logFormat)
 
+def main():
+
+	c = MongoClient()
+	patDB = c.patents
+
+	corpusDict = {}
+
+	# load the patents, but only their titles and abstracts
+	patents = patDB.patns.find({},{"title":1,"abstract":1})
+
+	tf-idf(patents, corpusDict)
+
+	# now save the dict of word document frequencies
+	patDB.corpusDict.insert(corpusDict)
 
 
 # dict stores the frequency of each word
@@ -86,7 +100,7 @@ def tf(patn):
 	for word in patn['text']:
 		patn['text'][word]['tf'] = patn['text'][word]['freq']/wordCount
 
-def tf-idf(patents, docFreqDict) {
+def tf-idf(patents, docFreqDict) :
 	for patn in patents: initPatentText(patn, docFreqDict)
 	# after the above loop, docFreqDict should be completely updated
 
@@ -103,6 +117,6 @@ def tf-idf(patents, docFreqDict) {
 		patn['text'][word]['tf-idf'] = patn['text'][word][tf] * idf[word]
 
 
-}
+
 
 
