@@ -22,7 +22,7 @@ def main():
 	# load the patents, but only their titles and abstracts
 	patents = patDB.patns.find({},{"title":1,"abstract":1})
 
-	tf-idf(patents, corpusDict)
+	tf_idf(patents, corpusDict)
 
 	# now save the dict of word document frequencies
 	patDB.corpusDict.insert(corpusDict)
@@ -45,10 +45,8 @@ def combineDicts(toBeCombined, corpus):
 def cleanTokens(tokens):
 	tokens = [token.lower() for token in tokens]
 
-def freq(s)
-
 def tokeAndClean(str):
-	tokenizer = RegexpTokenizer("[\w’]+")
+	tokenizer = RegexpTokenizer("[\w']+")
 	tokens = tokenizer.tokenize(str)
 	tokens = [token.lower() for token in tokens]
 
@@ -81,7 +79,7 @@ def initPatentText(patn, docFreq):
 
 	# Create entry for each word in patn['text'] and fill frequency field
 	for token in tokens:
-		if token not in patn['text']
+		if token not in patn['text']:
 			patn['text'][token]['freq'] = tokens.count(token)
 
 	for word in patn['text']:
@@ -94,17 +92,17 @@ def initPatentText(patn, docFreq):
 def tf(patn):
 	if not 'text' in patn: initPatentTextDict(patn)
 
-	wordCount = float(sum[patn['text'][word]['freq'] for word in patn['text']])
+	wordCount = float(sum([patn['text'][word]['freq'] for word in patn['text']]))
 
 	# term frequency = normalized frequency
 	for word in patn['text']:
 		patn['text'][word]['tf'] = patn['text'][word]['freq']/wordCount
 
-def tf-idf(patents, docFreqDict) :
+def tf_idf(patents, docFreqDict) :
 	for patn in patents: initPatentText(patn, docFreqDict)
 	# after the above loop, docFreqDict should be completely updated
 
-	totalWordCount = float(sum[docFreqDict[word] for word in docFreqDict])
+	totalWordCount = float(sum([docFreqDict[word] for word in docFreqDict]))
 	idf = docFreqDict.copy
 	for word in idf:
 		# TODO: What's the standard log base to use here?
@@ -113,8 +111,10 @@ def tf-idf(patents, docFreqDict) :
 
 	# idf is now a dictionary with an entry for each word in the corpus
 
-	for patn in patents: for word in patn['text']:
-		patn['text'][word]['tf-idf'] = patn['text'][word][tf] * idf[word]
+	# is there a cleaner way of writing this?
+	for patn in patents:
+		for word in patn['text']:
+			patn['text'][word]['tf-idf'] = patn['text'][word][tf] * idf[word]
 
 
 
