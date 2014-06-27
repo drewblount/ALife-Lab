@@ -89,55 +89,69 @@ def tf(patn, docFreq):
 	return text
 
 
-def tf_idf(patents, docFreq) :
-	print 'tf-idf called'
-	
+def tf_idf(patDB) :
+	 
+	# TODO: pick up preexisting docFreq (type: dict) if one is already in DB
+	docFreq = {}
+
+	patents = patDB.patns.find({},{"title":1,"abstract":1})
 	for patn in patents:
 		text = tf(patn, docFreq)
+		# Should perform a mongo update
+		# patDB.patns.save(patn)
+		# Adds text field to patDB.patns[patn]
+		patDB.patns.update({'_id': patn['_id']},
+						   {'$set': {'text': text}})
+	
 	# HERE: insert (bulk insert)/update (bulk update?) patn in mongodb
 	
-	# after the above loop, docFreqDict should be completely up-to-date
+	# after the above loop, docFreq should be completely up-to-date
 	# so idf can be computed.
 
-	totalWordCount = float(sum([docFreqDict[word] for word in docFreqDict]))
-	idf = docFreqDict.copy()
+	totalWordCount = float(sum([docFreq[word] for word in docFreq]))
+	idf = docFreq.copy()
+	# docFreq is kept untouched and saved on db, so idf can be updated without
+	# re-counting word frequencies across the corpus when a single
+	# document is inserted
 	for word in idf:
 		# TODO: What's the standard log base to use here?
 		# (the choice of base is just a multiplicative factor in the end)
 		idf[word] = math.log(totalWordCount/idf[word])
 
 	# idf is now a dictionary with an entry for each word in the corpus
-
+	
+	patents = patDB.patns.find({},{"title":1,"abstract":1,"text":1})
+	
 	# is there a cleaner way of writing this?
-	print 'end of tf_idf'
+
 	for patn in patents:
 		for word in patn['text']:
-			patn['text'][word]['tf-idf'] = patn['text'][word][tf] * idf[word]
-		print patn['text']
+			patn['text'][word]['tf-idf'] = patn['text'][word]['tf'] * idf[word]
+		# Should save the patent's text (patn['text'] is not in db)
+		patDB.patns.update({'_id': patn['_id']},
+						   {'$set': {'text': patn['text']}})
+						   
+	# overwrites corpusDict with docFreq
+	patDB.corpusDict.drop()
+	patDB.corpusDict.insert(docFreq)
+
+
 
 def main():
 	
 	c = MongoClient()
 	patDB = c.patents
 	
-	
-	corpusDict = {}
-	
+		
 	# load the patents, but only their titles and abstracts
-	patents = patDB.patns.find({},{"title":1,"abstract":1})
-	print 'patents loaded'
+	# (_id is automatically loaded, too, and is used later for
+	# patDB.save)
 	
-	tf_idf(patents, corpusDict)
+	
+	tf_idf(patDB)
 	
 	# now save the dict of word document frequencies
-	patDB.corpusDict.insert(corpusDict)
-
-	print 'patents:'
-	print patents
-	print '/patents'
-
-	# just a test to see if the patents have their stuff
-	patDB.tf_idf_patns.insert(patents)
+	#patDB.corpusDict.insert(corpusDict)
 
 # Makes main() run on typing 'python tf-idf.py' in terminal
 if __name__ == '__main__':
