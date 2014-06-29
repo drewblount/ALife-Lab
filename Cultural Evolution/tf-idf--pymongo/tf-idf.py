@@ -7,6 +7,8 @@ from nltk import bigrams, trigrams
 import math
 import logging
 
+import multiprocessing
+
 # for logging
 fnLog = 'tf-idf.log'
 logFormat = "%(asctime)s %(levelname)s %(processName)s\t%(message)s"
@@ -91,49 +93,75 @@ def tf(patn, docFreq):
 
 def tf_idf(patDB) :
 	 
+	print 'Begininning tf_idf'
+	 
 	# TODO: pick up preexisting docFreq (type: dict) if one is already in DB
-	docFreq = {}
+	# should be a parallel-accessible dictionary
+	docFreq = multiprocessing.Manager().dict()
 
 	patents = patDB.patns.find({},{"title":1,"abstract":1})
-	for patn in patents:
+	# defining __len__ allows the map function to be used with multiprocessing
+	# (map requires that an iterable has a length, and will load
+	# the whole db to measure its length if cursor.__len__ is
+	# not defined)
+	patents.__len__ = patents.count()
+
+	# pool of processors
+	procPool = multiprocessing.Pool(multiprocessing.cpu_count())
+	
+	
+	# in parallel, calculate the tf for each word in each patent's text,
+	# store it in the database, and simultaneously update the document
+	# frequency dictionary
+	def tf_updateDB(patn) :
 		text = tf(patn, docFreq)
-		# Should perform a mongo update
-		# patDB.patns.save(patn)
 		# Adds text field to patDB.patns[patn]
 		patDB.patns.update({'_id': patn['_id']},
 						   {'$set': {'text': text}})
-	
-	# HERE: insert (bulk insert)/update (bulk update?) patn in mongodb
-	
-	# after the above loop, docFreq should be completely up-to-date
+
+	print 'Calculating term and document frequencies...'
+	procPool.map(tf_updateDB, patents)
+	print 'term and document frequencies calculated.'
+		
+	# Now docFreq should be completely up-to-date
 	# so idf can be computed.
 
 	totalWordCount = float(sum([docFreq[word] for word in docFreq]))
 	idf = docFreq.copy()
-	# docFreq is kept untouched and saved on db, so idf can be updated without
+	# docFreq is later saved on db, so idf can be updated without
 	# re-counting word frequencies across the corpus when a single
-	# document is inserted
-	for word in idf:
-		# TODO: What's the standard log base to use here?
-		# (the choice of base is just a multiplicative factor in the end)
+	# document is inserted. Thus idf = docFreq.copy()
+	
+	
+	# In parallel, calculate the idf for each word in the dictionary
+	def df_to_idf(word):
 		idf[word] = math.log(totalWordCount/idf[word])
+	print 'Converting document frequencies to idf...'
+	procPool.map(df_to_idf, idf)
+	print 'idf dictionary calculated'
+		
 
-	# idf is now a dictionary with an entry for each word in the corpus
+
 	
+	# In parallel, add the idf score to each word in each patent.
 	patents = patDB.patns.find({},{"title":1,"abstract":1,"text":1})
-	
-	# is there a cleaner way of writing this?
 
-	for patn in patents:
+	def add_tfidf_to_patn:
 		for word in patn['text']:
 			patn['text'][word]['tf-idf'] = patn['text'][word]['tf'] * idf[word]
-		# Should save the patent's text (patn['text'] is not in db)
 		patDB.patns.update({'_id': patn['_id']},
 						   {'$set': {'text': patn['text']}})
 
+	print 'Calculating tf-idf for each word in each patent...'
+	procPool.map(add_tfidf_to_patn, patents)
+	print 'tf-idf saved for each patent'
+
+	print 'Saving document frequency dict as collection \'corpusDict\'...'
 	# overwrites corpusDict with docFreq
 	patDB.corpusDict.drop()
 	patDB.corpusDict.insert(docFreq)
+	print 'Doc freq dict saved as collection \'corpusDict\'.'
+	print 'tf-idf done!'
 
 
 
