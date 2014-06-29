@@ -130,7 +130,7 @@ def tf_idf(patDB) :
 		# Should save the patent's text (patn['text'] is not in db)
 		patDB.patns.update({'_id': patn['_id']},
 						   {'$set': {'text': patn['text']}})
-						   
+
 	# overwrites corpusDict with docFreq
 	patDB.corpusDict.drop()
 	patDB.corpusDict.insert(docFreq)
