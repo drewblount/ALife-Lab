@@ -110,6 +110,7 @@ def tf_idf(patDB) :
 	procPool = multiprocessing.Pool(multiprocessing.cpu_count())
 	
 	
+	
 	# in parallel, calculate the tf for each word in each patent's text,
 	# store it in the database, and simultaneously update the document
 	# frequency dictionary
@@ -123,6 +124,8 @@ def tf_idf(patDB) :
 	procPool.map(tf_updateDB, patents)
 	print 'term and document frequencies calculated.'
 		
+		
+		
 	# Now docFreq should be completely up-to-date
 	# so idf can be computed.
 
@@ -131,8 +134,7 @@ def tf_idf(patDB) :
 	# docFreq is later saved on db, so idf can be updated without
 	# re-counting word frequencies across the corpus when a single
 	# document is inserted. Thus idf = docFreq.copy()
-	
-	
+		
 	# In parallel, calculate the idf for each word in the dictionary
 	def df_to_idf(word):
 		idf[word] = math.log(totalWordCount/idf[word])
@@ -142,11 +144,10 @@ def tf_idf(patDB) :
 		
 
 
-	
 	# In parallel, add the idf score to each word in each patent.
 	patents = patDB.patns.find({},{"title":1,"abstract":1,"text":1})
 
-	def add_tfidf_to_patn:
+	def add_tfidf_to_patn(patn):
 		for word in patn['text']:
 			patn['text'][word]['tf-idf'] = patn['text'][word]['tf'] * idf[word]
 		patDB.patns.update({'_id': patn['_id']},
@@ -155,6 +156,8 @@ def tf_idf(patDB) :
 	print 'Calculating tf-idf for each word in each patent...'
 	procPool.map(add_tfidf_to_patn, patents)
 	print 'tf-idf saved for each patent'
+
+
 
 	print 'Saving document frequency dict as collection \'corpusDict\'...'
 	# overwrites corpusDict with docFreq
