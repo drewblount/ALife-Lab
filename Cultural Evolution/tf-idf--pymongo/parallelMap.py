@@ -30,7 +30,8 @@ def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1
 	# partFunc will be applied to each subset of the collection
 
 	if updateFreq > 1:
-		# use a bulk updater
+		# use a bulk updater (rseed lets me pass a random seed optionally)
+		
 		def partFunc(cursor):
 
 			# generates an appropriate bulk updater
@@ -41,11 +42,10 @@ def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1
 			
 			bulk = assignBulk()
 
-
+			updateNum = 0
 			if staggerThreads:
-				updateNum = random.randint(0, updateFreq - 1)
-			else:
-				updateNum = 0
+				updateNum += random.randint(0, updateFreq - 1)
+
 			for item in cursor:
 				updateNum += 1
 				# update item in the db, adding a field for the output of func(item)
