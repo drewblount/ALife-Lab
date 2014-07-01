@@ -27,7 +27,6 @@ def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1
 	# and tells that updater to execute its bulk updates every
 	# updateFreq calls of the function.
 		
-	collectionSize = collection.count()
 		
 	if updateFreq > 1:
 		if bulkOrdered: bulk = collection.initialize_ordered_bulk_op()

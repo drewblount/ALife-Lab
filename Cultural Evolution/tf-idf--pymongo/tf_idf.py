@@ -1,19 +1,11 @@
 import multiprocessing
 from pymongo import MongoClient
 from parallelMap import parallelMap
+from tokeAndClean import tokeAndClean
 from math import log
 from nltk.tokenize import RegexpTokenizer
+from bson.code import Code
 
-
-def tokeAndClean(str):
-	tokenizer = RegexpTokenizer("[\w']+")
-	tokens = tokenizer.tokenize(str)
-	tokens = [token.lower() for token in tokens]
-	
-	# TODO: remove stop words
-	# TODO: stemming
-	
-	return tokens
 
 # returns a dict of elements like (word: {freq: wordFreq})
 def countWords(tokens):
@@ -63,11 +55,20 @@ def initTexts(patDB):
 				updateFreq = 5000)
 
 
+# uses map/reduce to get the number of documents containing each word
+def generateDocFreq(patDB, outColName = 'corpusDict'):
+
+	map = Code(open('docFreqMap.js').read())
+	reduce = Code(open('docFreqReduce.js').read())
+
+	patDB.patns.map_reduce(map, reduce, outColName)
+
 def main():
 	c = MongoClient()
 	patDB = c.patents
+	
 	initTexts(patDB)
-
+	generateDocFreq(patDB)
 
 # Makes main() run on typing 'python tf-idf.py' in terminal
 if __name__ == '__main__':
