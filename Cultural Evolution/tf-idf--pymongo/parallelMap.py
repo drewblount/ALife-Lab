@@ -23,26 +23,7 @@ from pymongo import MongoClient
 
 def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1, waitToFinish = True, updateFreq = 1, bulkOrdered = False):
 
-	# if updateFreq > 1, my 'update' function adds an update to the idNum element to a bulk updater,
-	# and tells that updater to execute its bulk updates every
-	# updateFreq calls of the function.
-		
-		
-	if updateFreq > 1:
-		if bulkOrdered: bulk = collection.initialize_ordered_bulk_op()
-		else:           bulk = collection.initialize_unordered_bulk_op()
-		def bulkUpdate(idNum, param, commit):
-			
-			updateNum += 1
-			if commit:
-				bulk.execute()
-
-	# Otherwise, my 'update' function simply calls collection.update
-	else:
-		def update(idNum, param):
-			collection.update({'_id': idNum}, param, {'multi': False})
-
-	# This will be applied to everything in the collection
+	# partFunc will be applied to each subset of the collection
 
 	if updateFreq > 1:
 		# use a bulk updater
