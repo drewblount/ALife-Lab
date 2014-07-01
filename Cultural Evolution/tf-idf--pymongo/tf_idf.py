@@ -63,6 +63,7 @@ def initTexts(patDB):
 				findArgs = {'spec': {}, 'fields': {'title':1, 'abstract':1} },
 				# sends bulk updates to the db every updateFreq patents
 				updateFreq = 10000,
+				
 				bSize = 10000)
 
 

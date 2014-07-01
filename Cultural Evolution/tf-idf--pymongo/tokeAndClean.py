@@ -24,8 +24,8 @@ def tokeAndClean(str, bgrams = False, tgrams = False, stopwords = stopwords.word
 		return out
 	
 	# adds cleaned bigrams and trigrams if necessary
-	if(bgrams): tokens.extend(cleanNgram(bigrams(tokens)))
-	if(tgrams): tokens.extend(cleanNgram(trigrams(tokens)))
+	if(bgrams): tokens.extend(cleanNGram(bigrams(tokens)))
+	if(tgrams): tokens.extend(cleanNGram(trigrams(tokens)))
 		
 	
 	return tokens
