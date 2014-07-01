@@ -33,10 +33,8 @@ def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1
 			else:           bulk = collection.initialize_unordered_bulk_op()
 			
 			updateNum = 0
-			realNum = 0
 			for item in cursor:
 				updateNum += 1
-				realNum += 1
 				# update item in the db, adding a field for the output of func(item)
 				bulk.find({'_id': item['_id']}).update_one(func(item))
 				if updateNum == updateFreq:
@@ -45,7 +43,6 @@ def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1
 					updateNum = 0
 			# make sure a final execute is done
 			bulk.execute()
-			print 'This processor\'s partFunc was called ' + str(realNum) + ' times.'
 
 	else:
 		def partFunc(cursor):
@@ -58,11 +55,10 @@ def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1
 	workerProcesses = []
 	# add one to the result so cpu_count * partSize is never < collection.count()
 	partSize = collection.count()/multiprocessing.cpu_count() + 1
-	print 'partSize = ' + str(partSize)
 	for i in range(0, multiprocessing.cpu_count()):
 		# [a : b] partitions the result of find into the closed-open interval [a, b)
 		# if batch size hasn't been set, don't limit it
-		print 'ith part should be entries ' + str(i*partSize) + '-' + str((i+1)*partSize)
+		# print 'ith part should be entries ' + str(i*partSize) + '-' + str((i+1)*partSize)
 		if bSize < 0:
 			partCursor = collection.find(findArgs['spec'], findArgs['fields'])[i*partSize : (i+1)*partSize]
 			'partCursor size = ' + str(partCursor.count())
@@ -70,7 +66,7 @@ def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1
 		else:
 			partCursor = collection.find(findArgs['spec'], findArgs['fields'])[i*partSize : (i+1)*partSize].batch_size(bSize)
 			'partCursor size = ' + str(partCursor.count())
-		print 'partCursor size = ' + str(partCursor.count())
+		# print 'partCursor size = ' + str(partCursor.count())
 		
 		p = multiprocessing.Process(target=partFunc, args=(partCursor,))
 		#p = multiprocessing.Process(target=testFun, args=(i, ))

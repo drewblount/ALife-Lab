@@ -2,10 +2,9 @@ import multiprocessing
 from pymongo import MongoClient
 from parallelMap import parallelMap
 from tokeAndClean import tokeAndClean
-from math import log
+import math
 from nltk.tokenize import RegexpTokenizer
 from bson.code import Code
-
 
 # returns a dict of elements like (word: {freq: wordFreq})
 def countWords(tokens):
@@ -43,7 +42,9 @@ def initTexts(patDB):
 		else :
 			logging.warning('No abstract for patent %d.', patn['pno'])
 
-		text = tokeAndClean(text)
+		# faster, for testing:
+		text = tokeAndClean(text, stemming = False, stopwords = [])
+		# text = tokeAndClean(text)
 		text = countWords(text)
 		text = normalizeWordFreq(text)
 		
@@ -61,7 +62,32 @@ def generateDocFreq(patDB, outColName = 'corpusDict'):
 	map = Code(open('docFreqMap.js').read())
 	reduce = Code(open('docFreqReduce.js').read())
 
-	patDB.patns.map_reduce(map, reduce, outColName)
+	# finIDF will calculate IDF scores, so I have to pass it
+	# the number of total docs in a crafty way.
+	size = patDB.patns.count()
+	# replace all instances of TOTALDOCS with size in docFreqFinalize.js
+	finIDF = open('docFreqFinalize.js').read()
+	finIDF = finIDF.replace('TOTALDOCS', str(size))
+	
+	patDB.patns.map_reduce(map, reduce, outColName, finalize=finIDF)
+
+
+# assumes all the other stuff has been done
+def tf_idf(patDB):
+
+	def tf_idf_onePat(patn):
+
+		for word in patn['text']:
+			# getting the arguments of this find_one right was weirdly difficult
+			idf = patDB.corpusDict.find_one({'_id': word})['value']['idf']
+			patn['text'][word]['tf-idf'] = patn['text'][word]['tf'] * idf
+		return( {'$set': {'text' : patn['text'] } } )
+
+	parallelMap(tf_idf_onePat, patDB.patns,
+				findArgs = {'spec': {}, 'fields': {'text': 1} },
+				updateFreq = 5000)
+
+
 
 def main():
 	c = MongoClient()
@@ -70,17 +96,13 @@ def main():
 	initTexts(patDB)
 	generateDocFreq(patDB)
 
+	tf_idf(patDB)
+
+
+
 # Makes main() run on typing 'python tf-idf.py' in terminal
 if __name__ == '__main__':
 	main()
-
-
-
-
-
-
-
-
 
 
 
