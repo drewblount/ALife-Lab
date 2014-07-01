@@ -14,8 +14,11 @@ def tokeAndClean(str, bgrams = False, tgrams = False, stopwords = stopwords.word
 	tokens = [token.lower() for token in tokens if len(token) > 2]
 	
 	if stemming:
-		tokens = [stemmer.stem(token) for token in tokens]
-
+		try:
+			tokens = [stemmer.stem(token) for token in tokens if len(token) > 2]
+	# sometimes get a weird error from snowball because these tokens have length longer than 3 where the tokens are too short and snowball
+		except:
+			tokens = [stemmer.stem(token) for token in tokens if len(token) > 3]
 
 	def cleanNGram(ngrams):
 		out = [' '.join(token) for token in ngrams]
