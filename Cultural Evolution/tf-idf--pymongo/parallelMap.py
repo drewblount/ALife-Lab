@@ -1,5 +1,6 @@
 import multiprocessing
 from pymongo import MongoClient
+import random
 
 # # # # PARALLEL MAP # # # #
 # In need of an easy and parallel way to apply a function to each
@@ -19,20 +20,32 @@ from pymongo import MongoClient
 #				completing their tasks, else returns after sending workers
 # updateFreq: if more than one, loads all updates into a pymongo bulk_op
 # bulkOrdered: if using a bulk_op, determines if that op should be ordered
+# staggerThreads: a helpful kludge. A thread gets into a rhythm of calling mongod to
+#	do something while twiddling its thumbs, then working really hard while mongod twiddles.
+#	if staggerThreads, each thread will start this cycle at a random time in its period, avoiding
+#	bank-rush type scenarios but maybe not making much of a difference runtime-wise
 
-
-def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1, waitToFinish = True, updateFreq = 1, bulkOrdered = False):
+def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1, waitToFinish = True, updateFreq = 1, bulkOrdered = False, staggerThreads = True):
 
 	# partFunc will be applied to each subset of the collection
 
 	if updateFreq > 1:
 		# use a bulk updater
 		def partFunc(cursor):
+
+			# generates an appropriate bulk updater
+			def assignBulk():
+				if bulkOrdered: outBulk = collection.initialize_ordered_bulk_op()
+				else:           outBulk = collection.initialize_unordered_bulk_op()
+				return outBulk
 			
-			if bulkOrdered: bulk = collection.initialize_ordered_bulk_op()
-			else:           bulk = collection.initialize_unordered_bulk_op()
-			
-			updateNum = 0
+			bulk = assignBulk()
+
+
+			if staggerThreads:
+				updateNum = random().randint(0, updateFreq - 1)
+			else:
+				updateNum = 0
 			for item in cursor:
 				updateNum += 1
 				# update item in the db, adding a field for the output of func(item)
@@ -40,6 +53,8 @@ def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1
 				if updateNum == updateFreq:
 					# every updateFreq number of updates, sends a batch to the db.
 					bulk.execute()
+					# I was getting errors that 'Bulk options can only be executed once'
+					bulk = assignBulk()
 					updateNum = 0
 			# make sure a final execute is done
 			bulk.execute()
