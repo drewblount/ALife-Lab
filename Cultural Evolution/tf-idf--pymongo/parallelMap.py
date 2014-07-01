@@ -43,7 +43,7 @@ def parallelMap(func, collection, findArgs = {'spec':{},'fields':{}}, bSize = -1
 
 
 			if staggerThreads:
-				updateNum = random().randint(0, updateFreq - 1)
+				updateNum = random.randint(0, updateFreq - 1)
 			else:
 				updateNum = 0
 			for item in cursor:
