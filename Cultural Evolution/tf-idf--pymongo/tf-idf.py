@@ -1,3 +1,5 @@
+# Uses a fairly naive strategy to parallelize
+
 
 import re
 import nltk
@@ -90,25 +92,36 @@ def tf(patn, docFreq):
 		text[word]['tf'] = text[word]['freq']/wordCount
 	return text
 
+## TODO: make tf called parallel-ly below.p
+
 
 def tf_idf(patDB) :
 	 
 	print 'Begininning tf_idf'
+	
+	# PARALLEL SETUP
 	 
-	# TODO: pick up preexisting docFreq (type: dict) if one is already in DB
 	# should be a parallel-accessible dictionary
+	# TODO: pick up preexisting docFreq (type: dict) if one is already in DB
 	docFreq = multiprocessing.Manager().dict()
+
+	workerProcesses = []
+	numPats = patDB.patns.count()
+	patPartSize = numPats/multiprocessing.cpu_count()
+
+	for i in range(0, multiprocessing.cpu_count()):
+		patPartition = patDB.patns.find({},{"title":1,"abstract":1})[i * patPartSize : (i+1) * patPartSize]
+		p = multiprocessing.Process(target=work, args=())
 
 	patents = patDB.patns.find({},{"title":1,"abstract":1})
 	# defining __len__ allows the map function to be used with multiprocessing
 	# (map requires that an iterable has a length, and will load
 	# the whole db to measure its length if cursor.__len__ is
 	# not defined)
-	patents.__len__ = patents.count()
-
+	
+	print patents.len()
 	# pool of processors
 	procPool = multiprocessing.Pool(multiprocessing.cpu_count())
-	
 	
 	
 	# in parallel, calculate the tf for each word in each patent's text,
@@ -121,7 +134,7 @@ def tf_idf(patDB) :
 						   {'$set': {'text': text}})
 
 	print 'Calculating term and document frequencies...'
-	procPool.map(tf_updateDB, patents)
+	procPool.map(tf_updateDB, patents, 100)
 	print 'term and document frequencies calculated.'
 		
 		
@@ -146,6 +159,7 @@ def tf_idf(patDB) :
 
 	# In parallel, add the idf score to each word in each patent.
 	patents = patDB.patns.find({},{"title":1,"abstract":1,"text":1})
+	patents.__len__ = patents.count()
 
 	def add_tfidf_to_patn(patn):
 		for word in patn['text']:
