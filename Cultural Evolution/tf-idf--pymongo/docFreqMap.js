@@ -6,4 +6,7 @@ function docFreqMap() {
 	for (word in this.text) {
 		emit(word, 1);
 	}
+	
+	
+	
 }
