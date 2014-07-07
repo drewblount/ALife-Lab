@@ -6,6 +6,7 @@
 
 from pymongo  import MongoClient
 from operator import attrgetter
+import randPat
 
 
 # for operations where a document's order is important,
@@ -84,9 +85,15 @@ def sharedTopN(pat1, pat2, n, returnWords=False, patCol_to_update = False):
 	if returnWords: return shWords
 	else: return shCount
 
+# for randomly selected pairs
+def aveSharedTopN(numTrials, n):
+	totSharedTerms = 0
+	selector = randPat.Selector(patns, projection={'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1})
 
-
-
+	for i in range(numTrials):
+		pat1, pat2 = selector.randPat(), selector.randPat()
+		totSharedTerms += sharedTopN(pat1, pat2, n, patCol_to_update=patns)
+	return float(totSharedTerms)/numTrials
 
 
 
