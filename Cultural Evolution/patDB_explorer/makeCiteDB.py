@@ -28,7 +28,7 @@ def storeAllCites():
 					  in_collection  = patns,
 					  out_collection = cites,
 					  findArgs = {'spec': {}, 'fields': {'pno': 1, 'citedby' : 1, '_id': 0} },
-					  updateFreq = 100000,
+					  updateFreq = 1,
 					  bSize = 100000)
 
 def main():
