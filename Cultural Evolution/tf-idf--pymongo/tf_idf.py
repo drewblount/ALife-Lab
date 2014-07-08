@@ -80,8 +80,9 @@ def generateDocFreq(patDB, outColName = 'corpusDict'):
 	finIDF = open('docFreqFinalize.js').read()
 	finIDF = finIDF.replace('TOTALDOCS', str(size))
 	
-	patDB.patns.map_reduce(map, reduce, outColName, finalize=finIDF)
-
+	# patDB.patns.map_reduce(map, reduce, outColName, finalize=finIDF)
+	# can either reduce into outColName or replace it. I like replace for now
+	patDB.patns.map_reduce(map, reduce, out = {'replace':outColName}, finalize=finIDF)
 
 # assumes all the other stuff has been done
 def tf_idf(patDB):
