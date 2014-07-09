@@ -41,6 +41,6 @@ for citingPatn in patents.find( {}, {'rawcites':1, 'pno':1} ).sort( [ ('pno' , 1
 			# 'bulk' will (in theory) execute all of these update_ones in parallel, in nondeterministic order
 			bulk.find( {'pno' : citedNo} ).update_one( {'$push' : {'citedby': citingNo} } )
 
-	bulk.find( {'pno' : citingNo} ).update_one( {'$set': {'backCitesDrawn' = True} })
+	bulk.find( {'pno' : citingNo} ).update_one( {'$set': {'backCitesDrawn' : True} })
 
 bulk.execute()
