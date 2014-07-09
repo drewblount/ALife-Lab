@@ -2,7 +2,7 @@
 
 from pymongo import MongoClient
 import multiprocessing
-from time import time
+import time
 
 # These are all just the parameters I'm currently using on my
 # local machine
@@ -21,7 +21,7 @@ patents.ensure_index('pno')
 # if pat_metadata (max and min pno) isn't stored, store it
 if not patDB.pat_metadata.find_one({'_id': 'max_pno'}):
 	import maxmin
-	maxmin.storeMaxMinPno(PatDB)
+	maxmin.storeMaxMinPno(patDB)
 	
 max_pno = patDB.pat_metadata.find_one({'_id': 'max_pno'})['val']
 min_pno = patDB.pat_metadata.find_one({'_id': 'min_pno'})['val']
@@ -30,33 +30,29 @@ pnos = max_pno - min_pno + 1
 # add one to the result so cpu_count * pnosPerProc is never < pnos
 pnosPerProc = pnos / multiprocessing.cpu_count() + 1
 
+addToSetUntil = 4600000
 
 
-
-
-def backCite(thesePats)
-	bulk = client[dbname]['patns'].initialize_unordered_bulk_op()
+def backCiteNoBulk(thesePats):
 	count = 0
-	lastTime = time()
+	lastTime = time.time()
 	for citingPatn in thesePats:
 		# makes sure not to redraw citations
-		if backCitesDrawn not in citingPatn or citingPatn['backCitesDrawn'] == False:
+		if 'backCitesDrawn' not in citingPatn or citingPatn['backCitesDrawn'] == False:
 			count += 1
 			citingNo = citingPatn['pno']
 			if count == bulkExecuteFreq:
-				thisTime = time()
-				print 'db-dumping the ' + str(bulkExecuteFreq) ' patents until ' + str (citingNo)
-				print 'took ' + '--- %s seconds ---' % thisTime - lastTime
+				thisTime = time.time()
+				print 'db-dumping the ' + str(bulkExecuteFreq) + ' patents until ' + str (citingNo)
+				print 'took about ' + str(thisTime - lastTime) + ' seconds'
 				lastTime = thisTime
-				
-				bulk.execute()
-				bulk = client[dbname]['patns'].initialize_unordered_bulk_op()
 				count = 0
 
 			if citingNo < addToSetUntil:
-				bulk.find( {'pno' : {'$in' : citingPatn['rawcites'] } ).update( {'$addToSet' : {'citedby': citingNo} } )
+				patents.update( {'pno' : {'$in' : citingPatn['rawcites'] } } ,{'$addToSet' : {'citedby': citingNo} } , multi = True )
 			else:
-				bulk.find( {'pno' : {'$in' : citingPatn['rawcites'] } ).update( {'$push' : {'citedby': citingNo} } )
+				patents.update( {'pno' : {'$in' : citingPatn['rawcites'] } } ,{'$push' : {'citedby': citingNo} }, multi = True )
+			patents.update( {'pno' : citingNo}, {'$set': {'backCitesDrawn' : True} })
 
 	''' Seems like the above option would be faster, but I'm not sure
 			if citingNo < addToSetUntil:
@@ -68,10 +64,47 @@ def backCite(thesePats)
 					# 'bulk' will (in theory) execute all of these update_ones in parallel, in nondeterministic order
 					bulk.find( {'pno' : citedNo} ).update_one( {'$push' : {'citedby': citingNo} } )
 					'''
+
+def backCite(thesePats):
+	bulk = MongoClient[dbname]['patns'].initialize_ordered_bulk_op()
+	count = 0
+	lastTime = time.time()
+	for citingPatn in thesePats:
+		# makes sure not to redraw citations
+		if 'backCitesDrawn' not in citingPatn or citingPatn['backCitesDrawn'] == False:
+			count += 1
+			citingNo = citingPatn['pno']
+			if count == bulkExecuteFreq:
+				thisTime = time.time()
+				print 'db-dumping the ' + str(bulkExecuteFreq) + ' patents until ' + str (citingNo)
+				print 'took about ' + str(thisTime - lastTime) + ' seconds'
+				lastTime = thisTime
+				
+				bulk.execute()
+				bulk = client[dbname]['patns'].initialize_unordered_bulk_op()
+				count = 0
 			
+			if citingNo < addToSetUntil:
+				bulk.find( {'pno' : {'$in' : citingPatn['rawcites'] } } ).update( {'$addToSet' : {'citedby': citingNo} } )
+			else:
+				bulk.find( {'pno' : {'$in' : citingPatn['rawcites'] } } ).update( {'$push' : {'citedby': citingNo} } )
 			bulk.find( {'pno' : citingNo} ).update_one( {'$set': {'backCitesDrawn' : True} })
-			
+	
+	''' Seems like the above option would be faster, but I'm not sure
+		if citingNo < addToSetUntil:
+		for citedNo in citingPatn['rawcites'] :
+		# addToSet makes sure not to add duplicates
+		bulk.find( {'pno' : {'$in' : citingPatn['rawcites']} ).update_one( {'$addToSet' : {'citedby': citingNo} } )
+		else:
+		for citedPNo in citingPatn['rawcites'] :
+		# 'bulk' will (in theory) execute all of these update_ones in parallel, in nondeterministic order
+		bulk.find( {'pno' : citedNo} ).update_one( {'$push' : {'citedby': citingNo} } )
+		'''
+	
+	
 	bulk.execute()
+
+
 
 
 workerProcesses = []
@@ -80,7 +113,7 @@ for i in range(0, multiprocessing.cpu_count()):
 	# limiting batch_size to keep memory down, reduce timeouts
 	curs = patents.find({'pno' : {'$gte' : min_pno + i * pnosPerProc, '$lt': min_pno + (i+1) * pnosPerProc} },
 						{'rawcites':1, 'pno':1, 'backCitesDrawn':1} ).batch_size(10000)
-	p = multiprocessing.Process(target = backCite, args = (curs,) )
+	p = multiprocessing.Process(target = backCiteNoBulk, args = (curs,) )
 	p.daemon = True
 	p.start()
 	workerProcesses.append(p)
