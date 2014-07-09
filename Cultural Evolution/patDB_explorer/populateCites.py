@@ -40,7 +40,7 @@ def backCite(thesePats)
 	lastTime = time()
 	for citingPatn in thesePats:
 		# makes sure not to redraw citations
-		if backCitesDrawn not in citingPatn:
+		if backCitesDrawn not in citingPatn or citingPatn['backCitesDrawn'] == False:
 			count += 1
 			citingNo = citingPatn['pno']
 			if count == bulkExecuteFreq:
