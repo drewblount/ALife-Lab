@@ -54,7 +54,7 @@ def storeCiteNetwork():
 					  in_collection  = patents,
 					  out_collection = citeNetwork,
 					  findArgs = {'spec': {}, 'fields': {'pno': 1, 'rawcites' : 1, '_id': 0} },
-					  updateFreq = 10000,
+					  updateFreq = 1,
 					  bSize = 10000)
 	logging.info("Citation network built with parallelMapInsert")
 
