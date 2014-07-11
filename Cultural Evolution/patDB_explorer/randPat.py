@@ -7,8 +7,6 @@ patns = patDB.patns
 
 patns.ensure_index('pno')
 
-minPno = patDB
-
 # a random patent selector. 'projection' is a mongodb projection
 # which describes which fields to return; if left {} the entire
 # patent will be returned.
