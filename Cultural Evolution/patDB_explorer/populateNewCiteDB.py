@@ -43,10 +43,9 @@ logging.basicConfig(filename=fnLog, level=logging.NOTSET, format = logFormat)
 
 
 def storeCiteInfo(pat):
-	if 'rawcites' in pat and 'pno' in pat:
-		return({'_id': pat['pno']
-			   ,'rawcites': pat['rawcites']
-			   ,'citedby': [] } )
+	# the last check should solve for duplicate errors
+	if 'rawcites' in pat and 'pno' in pat and not citeNetwork.find_one( {'_id': pat['pno']} ):
+		return( {'_id': pat['pno'] }, {'rawcites': pat['rawcites'], 'citedby': [] } )
 
 def storeCiteNetwork():
 	logging.info("Building the citation network")
@@ -122,7 +121,7 @@ def backCite(startPno, endPno, coreNum=0):
 def drawBackCites(patCol):
 	workerProcesses = []
 	for i in range(0, multiprocessing.cpu_count()):
-		# Load only the pno and rawcites from each patent, sort by pno so progress reports are possible
+			# Load only the pno and rawcites from each patent, sort by pno so progress reports are possible
 		# limiting batch_size to keep memory down, reduce timeouts
 		p = multiprocessing.Process(target = backCite, args = (min_pno + i * pnosPerProc, min_pno + (i+1) * pnosPerProc, i+1) )
 		p.daemon = True
@@ -134,7 +133,7 @@ def drawBackCites(patCol):
 
 
 def main():
-	patDB.eval('''db.runCommand({ touch: "cite_net", data: true, index: true })''')
+	# patDB.eval('''db.runCommand({ touch: "cite_net", data: true, index: true })''')
 	
 	storeCiteNetwork()
 	print "loading cite_network into memory with mongo db.touch."
