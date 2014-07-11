@@ -36,13 +36,15 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 					try: bulk.execute()
 					# if for some reason bulk is empty we get an InvalidOperation
 					except TypeError: pass
+					except BulkWriteError: pass
 					else: pass
 					# I was getting errors that 'Bulk options can only be executed once'
 					bulk = assignBulk()
 					updateNum = 0
 			# make sure a final execute is done
 			try: bulk.execute()
-			except: TypeError
+			except TypeError: pass
+			except BulkWriteError: pass
 			else: pass
 	else:
 		def partFunc(cursor):
