@@ -80,6 +80,7 @@ def backCite(startPno, endPno):
 
 		start = startPno + i * bulkExecuteFreq
 		end = min(endPno, startPno + (i+1) * bulkExecuteFreq)
+		print 'Python is sifting through patns ' + start + ' through ' + end
 		# hopefully including 'citedby' will prevent mongod from digging through the HD to do each citedby update'
 		# need to generate a new cursor for each bulk execution because cursors time out during bulk execs
 		thesePats = thisCollection.find({'pno' : {'$gte' : start, '$lt': end} },
