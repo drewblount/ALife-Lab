@@ -75,7 +75,6 @@ def backCite(startPno, endPno, coreNum=0):
 	
 	totalBulkExecs = (endPno - startPno) / bulkExecuteFreq + 1
 	thisCollection = MongoClient()[dbname]['cite_net']
-	lastTime = time.time()
 	
 	logging.info("%d: Drawing undrawn back-citations for patns %d-%d, using %d ordered bulk op executions, each back-citing %d patents.", coreNum, startPno, endPno, totalBulkExecs, bulkExecuteFreq)
 
@@ -127,6 +126,21 @@ def drawBackCites(patCol):
 
 	for p in workerProcesses:
 		p.join()
+'''
+# This makes some convenient assumptions: fromCol is of format {'_id': patentNumber, 'citedby': blah}
+def copyBackCites(fromCol, toCol):
+	def copyBackCite(startPno, endPno, coreNum=0):
+		totalBulkExecs = (endPno - startPno) / bulkExecuteFreq + 1
+
+	for i in range(totalBulkExecs):
+
+	start = startPno + i * bulkExecuteFreq
+	end = min(endPno, startPno + (i+1) * bulkExecuteFreq)
+	logging.info("%d: STARTING BATCH %d; PATNS %d-%d", coreNum, i, start, end)
+
+
+		for patn in fromCol:
+'''
 
 def main():
 	storeCiteNetwork()
@@ -136,11 +150,12 @@ def main():
 	print "cite_net in memory"
 	logging.info("cite_net in memory")
 	drawBackCites(citeNetwork)
-	print "back_cites drawn"
+	print "back_cites drawn" #; copying to main db"
+	logging.info("back_cites drawn") #; copying to main db")
+
 
 if __name__ == '__main__':
 	main()
-
 
 
 
