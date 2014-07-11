@@ -16,8 +16,10 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 
 			# generates an appropriate bulk updater
 			def assignBulk():
-				if bulkOrdered: outBulk = out_collection.initialize_ordered_bulk_op()
-				else:           outBulk = out_collection.initialize_unordered_bulk_op()
+				if bulkOrdered:
+					outBulk = out_collection.initialize_ordered_bulk_op()
+				else:
+					outBulk = out_collection.initialize_unordered_bulk_op()
 				return outBulk
 			
 			bulk = assignBulk()
@@ -30,7 +32,7 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 				updateNum += 1
 				# update item in the db, adding a field for the output of func(item)
 				out = func(item)
-				if out: bulk.insert(out)
+				if out: bulk.insert(out, continue_on_error=True)
 				if updateNum == updateFreq:
 					# every updateFreq number of updates, sends a batch to the db.
 					try: bulk.execute()
@@ -42,7 +44,8 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 					updateNum = 0
 			# make sure a final execute is done
 			try: bulk.execute()
-			except: TypeError
+			except TypeError: pass
+			except BulkWriteError: pass
 			else: pass
 	else:
 		def partFunc(cursor):

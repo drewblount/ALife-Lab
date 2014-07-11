@@ -4,7 +4,7 @@
 # CAREFUL: offset skips that many patents on each processor. Use with caution; check logs to make sure first few batches were empty (we only want to skip empty batches)
 offset = 100000
 
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 import multiprocessing
 import time
 from datetime import datetime
@@ -19,6 +19,8 @@ patDB = client[dbname]
 patents = patDB['patns']
 client[dbname]['patns'].ensure_index( [ ('pno', 1) ] )
 citeNetwork = patDB['cite_net']
+
+
 
 # if pat_metadata (max and min pno) isn't stored, store it
 if not patDB.pat_metadata.find_one({'_id': 'max_pno'}):
@@ -38,6 +40,8 @@ logging.basicConfig(filename=fnLog, level=logging.NOTSET, format = logFormat)
 
 # First builds a new patent collection containing only the bare minimum info,
 # so the whole thing can fit on memory
+
+
 def storeCiteInfo(pat):
 	if 'rawcites' in pat and 'pno' in pat:
 		return({'_id': pat['pno']
@@ -51,7 +55,7 @@ def storeCiteNetwork():
 					  out_collection = citeNetwork,
 					  findArgs = {'spec': {}, 'fields': {'pno': 1, 'rawcites' : 1, '_id': 0} },
 					  updateFreq = 1,
-					  bSize = 100000)
+					  bSize = 10000)
 	logging.info("Citation network built with parallelMapInsert")
 
 
@@ -75,7 +79,6 @@ def backCite(startPno, endPno, coreNum=0):
 	
 	totalBulkExecs = (endPno - startPno) / bulkExecuteFreq + 1
 	thisCollection = MongoClient()[dbname]['cite_net']
-	lastTime = time.time()
 	
 	logging.info("%d: Drawing undrawn back-citations for patns %d-%d, using %d ordered bulk op executions, each back-citing %d patents.", coreNum, startPno, endPno, totalBulkExecs, bulkExecuteFreq)
 
@@ -97,12 +100,13 @@ def backCite(startPno, endPno, coreNum=0):
 		anyToAdd = False
 		for citingPatn in thesePats:
 			# makes sure not to redraw citations
-			if 'backCitesDrawn' not in citingPatn or citingPatn['backCitesDrawn'] == False:
+			if 'bCited' not in citingPatn or citingPatn['bCited'] == False:
 				count += 1
 				citingNo = citingPatn['pno']
 				
 				bulk.find( {'pno' : {'$in' : citingPatn['rawcites'] } } ).update( {'$push' : {'citedby': citingNo} } )
-				bulk.find( {'pno' : citingNo} ).update_one( {'$set': {'backCitesDrawn' : True} })
+				#
+				bulk.find( {'pno' : citingNo} ).update_one( {'$set': {'bCited' : True} })
 
 		if count > 1:
 			logging.info("%d: %d patns with undrawn back-cites found; sending bulk.execute()", coreNum, count)
@@ -128,7 +132,10 @@ def drawBackCites(patCol):
 	for p in workerProcesses:
 		p.join()
 
+
 def main():
+	patDB.eval('''db.runCommand({ touch: "cite_net", data: true, index: true })''')
+	
 	storeCiteNetwork()
 	print "loading cite_network into memory with mongo db.touch."
 	logging.info("loading cite_network into memory with mongo db.touch.")
@@ -136,11 +143,12 @@ def main():
 	print "cite_net in memory"
 	logging.info("cite_net in memory")
 	drawBackCites(citeNetwork)
-	print "back_cites drawn"
+	print "back_cites drawn" #; copying to main db"
+	logging.info("back_cites drawn") #; copying to main db")
+
 
 if __name__ == '__main__':
 	main()
-
 
 
 
