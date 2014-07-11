@@ -11,7 +11,8 @@ from pymongo import MongoClient
 
 patDB = MongoClient().patents
 patns = patDB.patns
-cites = patDB.cites
+cite_net = patDB.cite_net
+just_cites = patDB.just_cites
 
 # returns an array of {source: pno, cited: pno} for every citation
 # whose source is 'pat'
@@ -20,16 +21,16 @@ def storeCites(pat):
 	if 'citedby' in pat and 'pno' in pat:
 		citedNum = pat['pno']
 		for citer in pat['citedby']:
-			outCites.append({'source': citer, 'cited': citedNum})
+			outCites.append({'src': citer, 'ctd': citedNum})
 	return outCites
 
 def storeAllCites():
 	parallelMapInsert(func = storeCites,
-					  in_collection  = patns,
-					  out_collection = cites,
+					  in_collection  = cite_net,
+					  out_collection = just_cites,
 					  findArgs = {'spec': {}, 'fields': {'pno': 1, 'citedby' : 1, '_id': 0} },
-					  updateFreq = 1,
-					  bSize = 100000)
+					  updateFreq = 5000,
+					  bSize = 10000)
 
 def main():
 	storeAllCites()

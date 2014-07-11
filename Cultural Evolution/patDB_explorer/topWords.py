@@ -6,6 +6,7 @@
 
 from pymongo  import MongoClient
 from operator import attrgetter
+from parallelMap import parallelMap
 import randPat
 
 
@@ -62,6 +63,16 @@ def topNTerms(patn, n, patCol_to_update = False, display=False):
 			displaySortedWord(word)
 	return patn['sorted_text'][:n]
 
+def update_sorted_text(patn):
+	return ( {'$set': {'sorted_text' : createSortedText(patn) } } )
+
+def sort_all_texts(pats_to_update):
+	parallelMap(update_sorted_text,
+				in_collection=patns,
+				out_collection=patns,
+				findArgs={'spec':{}, 'fields':{'pno': 1, 'text':1, 'sorted_text':1,'_id':0}},
+				bSize = 5000,
+				updateFreq = 5000)
 
 def orderAllTexts(disp= False, showN= 10):
 	pats = patns.find({}, {'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1})
