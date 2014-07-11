@@ -16,8 +16,10 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 
 			# generates an appropriate bulk updater
 			def assignBulk():
-				if bulkOrdered: outBulk = out_collection.initialize_ordered_bulk_op()
-				else:           outBulk = out_collection.initialize_unordered_bulk_op()
+				if bulkOrdered:
+					outBulk = out_collection.initialize_ordered_bulk_op()
+				else:
+					outBulk = out_collection.initialize_unordered_bulk_op()
 				return outBulk
 			
 			bulk = assignBulk()
@@ -30,13 +32,12 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 				updateNum += 1
 				# update item in the db, adding a field for the output of func(item)
 				out = func(item)
-				if out: bulk.insert(out)
+				if out: bulk.insert(out, continue_on_error=True)
 				if updateNum == updateFreq:
 					# every updateFreq number of updates, sends a batch to the db.
 					try: bulk.execute()
 					# if for some reason bulk is empty we get an InvalidOperation
 					except TypeError: pass
-					except BulkWriteError: pass
 					else: pass
 					# I was getting errors that 'Bulk options can only be executed once'
 					bulk = assignBulk()
