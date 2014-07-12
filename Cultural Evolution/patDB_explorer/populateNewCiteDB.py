@@ -45,7 +45,7 @@ logging.basicConfig(filename=fnLog, level=logging.NOTSET, format = logFormat)
 def storeCiteInfo(pat):
 	# the last check should solve for duplicate errors
 	if 'rawcites' in pat and 'pno' in pat and not citeNetwork.find_one( {'_id': pat['pno']} ):
-		return( {'_id': pat['pno'] }, {'rawcites': pat['rawcites'], 'citedby': [] } )
+		return( {'_id': pat['pno'], 'rawcites': pat['rawcites'], 'citedby': [] } )
 
 def storeCiteNetwork():
 	logging.info("Building the citation network")

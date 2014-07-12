@@ -28,13 +28,6 @@ def storeAllCites():
 	parallelMapInsert(func = storeCites,
 					  in_collection  = cite_net,
 					  out_collection = just_cites,
-					  findArgs = {'spec': {}, 'fields': {'pno': 1, 'citedby' : 1, '_id': 0} },
+					  findArgs = {'spec': {}, 'fields': {'citedby' : 1, '_id': 1} },
 					  updateFreq = 5000,
 					  bSize = 10000)
-
-def main():
-	storeAllCites()
-
-# Makes main() run on typing 'python tf-idf.py' in terminal
-if __name__ == '__main__':
-	main()

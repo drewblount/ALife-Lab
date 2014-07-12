@@ -23,6 +23,7 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 				return outBulk
 			
 			bulk = assignBulk()
+			anyToAdd = False
 
 			updateNum = 0
 			if staggerThreads:
@@ -32,21 +33,26 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 				updateNum += 1
 				# update item in the db, adding a field for the output of func(item)
 				out = func(item)
-				if out: bulk.insert(out, manipulate=True, safe=None, check_keys=True, continue_on_error=True)
+				if out:
+					bulk.insert(out, manipulate=True, safe=None, check_keys=True, continue_on_error=True)
+					anyToAdd = True
 				if updateNum == updateFreq:
 					# every updateFreq number of updates, sends a batch to the db.
-					try: bulk.execute()
-					# if for some reason bulk is empty we get an InvalidOperation
-					except TypeError: pass
-					else: pass
-					# I was getting errors that 'Bulk options can only be executed once'
-					bulk = assignBulk()
+					if anyToAdd:
+						try: bulk.execute()
+						# if for some reason bulk is empty we get an InvalidOperation
+						except TypeError: pass
+						else: pass
+						# I was getting errors that 'Bulk options can only be executed once'
+						bulk = assignBulk()
+						anyToAdd = False
 					updateNum = 0
 			# make sure a final execute is done
-			try: bulk.execute()
-			except TypeError: pass
-			except BulkWriteError: pass
-			else: pass
+			if anyToAdd:
+				try: bulk.execute()
+				except TypeError: pass
+				except BulkWriteError: pass
+				else: pass
 	else:
 		def partFunc(cursor):
 			for item in cursor:

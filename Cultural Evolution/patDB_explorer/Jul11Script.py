@@ -1,7 +1,10 @@
+# NEVER STORED JUST CITES
+
 from pymongo import MongoClient
 import logging
 import populateNewCiteDB
 from datetime import datetime
+from parallelMapInsert import parallelMapInsert
 
 # For logging: copied from Andy's readPatnsFromFiles.py
 fnLog = 'backCiteswNewCol.log'
@@ -38,40 +41,40 @@ db.%(main_name)s.update( {pno: obj['_id'] }, {$set: {citedby: obj['citedby'] } }
 
 
 def main():
-	
+
+
 	print str(datetime.now()) + ' POPULATING NEW CITE NET DB'
-	
 	populateNewCiteDB.storeCiteNetwork()
-	print "loading cite_network into memory with mongo db.touch."
+	print str(datetime.now()) + "loading cite_network into memory with mongo db.touch."
 	logging.info("loading cite_network into memory with mongo db.touch.")
 	patDB.eval('''db.runCommand({ touch: "cite_net", data: true, index: true })''')
-	print "cite_net in memory"
+	print str(datetime.now()) + "cite_net in memory"
 	logging.info("cite_net in memory")
-	populateNewCiteDB.drawBackCites(citeNetwork)
-	print "back_cites drawn" #; copying to main db"
+	populateNewCiteDB.drawBackCites(cite_net)
+	print str(datetime.now()) + "back_cites drawn" #; copying to main db"
 	logging.info("back_cites drawn") #; copying to main db")
 
 
 
 	print str(datetime.now()) + ' MAKING PURE CITE DB (FOR RANDOMIZATION)'
-	execfile("makeCiteDB.py")
+	import makeCiteDB
+	makeCiteDB.storeAllCites()
 	
 	
 	
 	print str(datetime.now()) + ' RANDOMIZING PURE CITE DB'
-	execfile("randomizeCollection.py")
+	import randomizeCollection
 	print str(datetime.now()) + ' CREATING RAND IDS'
-	create_rand_ids(just_cites)
+	randomizeCollection.create_rand_ids(just_cites)
 	print str(datetime.now()) + ' INDEXING RAND IDS'
-	index_rand_ids(just_cites)
-
+	randomizeCollection.index_rand_ids(just_cites)
 
 
 	print str(datetime.now()) + ' ~~~~~CHANGING~GEARS~~~~~'
 	print str(datetime.now()) + ' SORTING EACH PATENT\'S TEXT'
-	execfile("topWords.py")
-	sort_all_texts(patns)
-	
+	import topWords
+	topWords.sort_all_texts(patns)
+
 
 
     #updateMainDB(cite_net, patns)
