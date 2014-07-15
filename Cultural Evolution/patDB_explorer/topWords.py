@@ -127,15 +127,15 @@ def avg_shared_terms(numTrials, n, cite_pair = False, texts_already_ordered = Fa
 # Like the above, but chooses only citation-pairs of patents
 def avg_shared_terms_cited(numTrials, n, texts_already_ordered = False, verbose = False):
 	totSharedTerms = 0
-		selector = get_selector(texts_already_ordered)
-		
-		for i in range(numTrials):
-			pat1, pat2 = selector.get_rand_cite()
-			shares = sharedTopN(pat1, pat2, n, returnWords = False, patCol_to_update=patns, verbose = verbose)
-			if shares > 0:
-				#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
-				totSharedTerms += shares
-		return float(totSharedTerms)/numTrials
+	selector = get_selector(texts_already_ordered)
+	
+	for i in range(numTrials):
+		pat1, pat2 = selector.get_rand_cite()
+		shares = sharedTopN(pat1, pat2, n, returnWords = False, patCol_to_update=patns, verbose = verbose)
+		if shares > 0:
+			#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
+			totSharedTerms += shares
+	return float(totSharedTerms)/numTrials
 
 
 

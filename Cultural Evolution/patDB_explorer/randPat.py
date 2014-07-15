@@ -21,8 +21,8 @@ class Selector(object):
     def __init__(self, patCol, projection = {'_id':0}, rand_seed = None, db = patDB, verbose = False, buf_size = 10000):
         
         if not db.pat_metadata.find_one({'_id': 'max_pno'}):
-            import maxmin
-    maxmin.storeMaxMinPno(db)
+			import maxmin
+			maxmin.storeMaxMinPno(db)
 
 from pymongo  import MongoClient, ASCENDING, DESCENDING
 from bson.code import Code
