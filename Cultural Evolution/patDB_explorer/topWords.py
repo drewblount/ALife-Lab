@@ -9,7 +9,6 @@
 
 from pymongo  import MongoClient
 from operator import attrgetter
-from parallelMap import parallelMap
 import randPat
 import time
 
@@ -31,9 +30,9 @@ def dictToArray(D, keylabel = "key"):
 	for elem in D:
 		# just copies the dict entry in an array
 		newElem = D[elem]
-newElem[keylabel] = elem
-arr.append(newElem)
-return arr
+		newElem[keylabel] = elem
+		arr.append(newElem)
+	return arr
 
 # For a patent, produces an array of the words in that patent's text
 # in descending tf-idf order
@@ -57,27 +56,17 @@ def displaySortedWord(word):
 def topNTerms(patn, n, patCol_to_update = False, display=False):
 	if 'sorted_text' not in patn:
 		patn['sorted_text'] = createSortedText(patn)
-# if the optional patCol_to_update arg is used, and the patent's text has never
-# been sorted before, save the sorted text in the patent collection
-if patCol_to_update:
-	patCol_to_update.update({'pno': patn['pno']},{'$set': {'sorted_text': patn['sorted_text']}})
+		# if the optional patCol_to_update arg is used, and the patent's text has never
+		# been sorted before, save the sorted text in the patent collection
+		if patCol_to_update:
+			patCol_to_update.update({'pno': patn['pno']},{'$set': {'sorted_text': patn['sorted_text']}})
 	if display:
 		print '\n'
-print 'Patent ' + str(pat['pno']) + ': ' + pat['title']
-for word in patn['sorted_text'][:n]:
-	displaySortedWord(word)
+		print 'Patent ' + str(pat['pno']) + ': ' + pat['title']
+		for word in patn['sorted_text'][:n]:
+			displaySortedWord(word)
 	return patn['sorted_text'][:n]
 
-def update_sorted_text(patn):
-	return ( {'$set': {'sorted_text' : createSortedText(patn) } } )
-
-def sort_all_texts(pats_to_update):
-	parallelMap(update_sorted_text,
-		    in_collection=patns,
-		    out_collection=patns,
-		    findArgs={'spec':{}, 'fields':{'pno': 1, 'text':1, 'sorted_text':1,'_id':0}},
-		    bSize = 5000,
-		    updateFreq = 5000)
 
 def orderAllTexts(disp= False, showN= 10):
 	pats = patns.find({}, {'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1})
@@ -101,12 +90,12 @@ def sharedTopN(pat1, pat2, n, returnWords=False, patCol_to_update = False, verbo
 		if word2['word'] in compare_dict:
 			if returnWords or verbose:
 				shWords.append(word2['word'])
-	shCount += 1
+			shCount += 1
 	if verbose and shCount > 0:
 		print '%d and %d share top term(s): %s' % (pat1['pno'], pat2['pno'], ', '.join(shWords))
-
-		if returnWords: return shWords
-		else: return shCount
+	
+	if returnWords: return shWords
+	else: return shCount
 
 
 # If texts are already sorted, we save a lot of memory by
@@ -128,22 +117,35 @@ def avg_shared_terms(numTrials, n, cite_pair = False, texts_already_ordered = Fa
 	for i in range(numTrials):
 		if cite_pair:
 			pat1, pat2 = selector.ran
-pat1, pat2 = selector.rand_pair()
-shares = sharedTopN(pat1, pat2, n, returnWords = False, patCol_to_update=patns, verbose = verbose)
-if shares > 0:
-	#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
-	totSharedTerms += shares
+		pat1, pat2 = selector.rand_pair()
+		shares = sharedTopN(pat1, pat2, n, returnWords = False, patCol_to_update=patns, verbose = verbose)
+		if shares > 0:
+			#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
+			totSharedTerms += shares
 	return float(totSharedTerms)/numTrials
 
 # Like the above, but chooses only citation-pairs of patents
 def avg_shared_terms_cited(numTrials, n, texts_already_ordered = False, verbose = False):
 	totSharedTerms = 0
-selector = get_selector(texts_already_ordered)
+		selector = get_selector(texts_already_ordered)
+		
+		for i in range(numTrials):
+			pat1, pat2 = selector.get_rand_cite()
+			shares = sharedTopN(pat1, pat2, n, returnWords = False, patCol_to_update=patns, verbose = verbose)
+			if shares > 0:
+				#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
+				totSharedTerms += shares
+		return float(totSharedTerms)/numTrials
 
-for i in range(numTrials):
-	pat1, pat2 = selector.get_rand_cite()
-	shares = sharedTopN(pat1, pat2, n, returnWords = False, patCol_to_update=patns, verbose = verbose)
-	if shares > 0:
-		#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
-		totSharedTerms += shares
-return float(totSharedTerms)/numTrials
+
+
+
+
+
+
+
+
+
+
+
+

@@ -24,76 +24,102 @@ class Selector(object):
             import maxmin
     maxmin.storeMaxMinPno(db)
 
-self.max_pno = db.pat_metadata.find_one({'_id': 'max_pno'})['val']
-self.min_pno = db.pat_metadata.find_one({'_id': 'min_pno'})['val']
-self.verbose = verbose
-
-patCol.ensure_index('pno')
-
-
-# default randSeed is system time
-random.seed(rand_seed)
-
-self.col = patCol
-self.proj = projection
-self.rand_cites = []
-self.rand_cite_size = buf_size
+from pymongo  import MongoClient, ASCENDING, DESCENDING
+from bson.code import Code
+import random
+from randomizeCollection import rand_doc, n_rand_docs
 
 
-# randomly chooses a patent number in the pno range covered by
-# the patent collection
-# Set retryIfAbsent to False if the collection contains relatively
-# few pnos between min_pno and max_pno; this results in a non-uniform
-# random distribution
-def rand_pat(self, retryIfAbsent=True):
-    rand_pno = random.randint(self.min_pno, self.max_pno)
-if self.verbose: print 'rand pno is ' + str(rand_pno)
-randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
-if retryIfAbsent:
-    while not randy:
-        rand_pno = random.randint(self.min_pno, self.max_pno)
-        randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
-return randy
+patDB = MongoClient().patents
+patns = patDB.patns
+just_cites = patDB.just_cites
 
-# Allows you to choose two different patents at random, checking that
-# you don't accidentally choose the same one twice
-def rand_pair(self):
-    pat1 = self.rand_pat()
-pat2 = self.rand_pat()
-while pat1['pno'] == pat2['pno']:
-    pat2 = self.rand_pat()
-return pat1, pat2
+patns.ensure_index('pno')
 
-# given a just_cite doc of the form {src: pno, cte: pno},
-# returns both patents
-def just_cite_to_patns(cite):
-    source = patns.find_one({'pno':cite['src']}, self.proj)
-cited  = patns.find_one({'pno':cite['cte']}, self.proj)
-return (source, cited)
+# a random patent selector. 'projection' is a mongodb projection
+# which describes which fields to return; if left {} the entire
+# patent will be returned.
 
-def stock_n_cite_pairs(self, n):
-    self.rand_cites.append( n_rand_docs( n, just_cites ) )
+# buf_size is the number of citation links {src: pno, cte: pno} are
+# stored by the selector at a time (to reduce calls to the cite db)
+class Selector(object):
+	
+	def __init__(self, patCol, projection = {'_id':0}, rand_seed = None, db = patDB, verbose = False, buf_size = 10000):
+		
+		if not db.pat_metadata.find_one({'_id': 'max_pno'}):
+			import maxmin
+			maxmin.storeMaxMinPno(db)
+		
+		self.max_pno = db.pat_metadata.find_one({'_id': 'max_pno'})['val']
+		self.min_pno = db.pat_metadata.find_one({'_id': 'min_pno'})['val']
+		self.verbose = verbose
+		
+		patCol.ensure_index('pno')
+		
+		
+		# default randSeed is system time
+		random.seed(rand_seed)
+		
+		self.col = patCol
+		self.proj = projection
+		self.rand_cites = []
+		self.rand_cite_size = buf_size
+	
+	
+	# randomly chooses a patent number in the pno range covered by
+	# the patent collection
+	# Set retryIfAbsent to False if the collection contains relatively
+	# few pnos between min_pno and max_pno; this results in a non-uniform
+	# random distribution
+	def rand_pat(self, retryIfAbsent=True):
+		rand_pno = random.randint(self.min_pno, self.max_pno)
+		if self.verbose: print 'rand pno is ' + str(rand_pno)
+		randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
+		if retryIfAbsent:
+			while not randy:
+				rand_pno = random.randint(self.min_pno, self.max_pno)
+				randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
+		return randy
+	
+	# Allows you to choose two different patents at random, checking that
+	# you don't accidentally choose the same one twice
+	def rand_pair(self):
+		pat1 = self.rand_pat()
+		pat2 = self.rand_pat()
+		while pat1['pno'] == pat2['pno']:
+			pat2 = self.rand_pat()
+		return pat1, pat2
+	
+	# given a just_cite doc of the form {src: pno, cte: pno},
+	# returns both patents
+	def just_cite_to_patns(cite):
+		source = patns.find_one({'pno':cite['src']}, self.proj)
+		cited  = patns.find_one({'pno':cite['cte']}, self.proj)
+		return (source, cited)
+	
+	def stock_n_cite_pairs(self, n):
+		self.rand_cites.append( n_rand_docs( n, just_cites ) )
+	
+	# required_fields is a list of strings, each string is the name
+	# of a field that must be in each of the returned patents
+	def get_rand_cite(required_fields = []):
+		if self.rand_cites == []:
+			stock_n_cite_pairs(buf_size)
+		# HOW DO I POP from an array?
+		citation = self.rand_cites.pop()
+		p1, p2 = just_cite_to_patns(citation)
+		
+		have_fields = True
+		for field in required_fields:
+			if field not in p1 or field not in p2:
+				have_fields = False
+				break
+		
+		if have_fields: return (p1,p2)
+		# Try again if one of the patents is missing a required field
+		else: return get_rand_cite(required_fields)
 
-    # required_fields is a list of strings, each string is the name
-    # of a field that must be in each of the returned patents
-    def get_rand_cite(required_fields = []):
-        if self.rand_cites == []:
-            stock_n_cite_pairs(buf_size)
-# HOW DO I POP from an array?
-citation = self.rand_cites.pop()
-p1, p2 = just_cite_to_patns(citation)
-
-have_fields = True
-for field in required_fields:
-    if field not in p1 or field not in p2:
-        have_fields = False
-        break
-
-if have_fields: return (p1,p2)
-# Try again if one of the patents is missing a required field
-else: return get_rand_cite(required_fields)
 
 
 
-
-#def rand_cite_pair(self):
+#	def rand_cite_pair(self):
