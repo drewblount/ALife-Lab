@@ -107,12 +107,16 @@ def get_selector(texts_already_ordered = False):
 	else:
 		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1, '_id': 0})
 
-
-def avg_shared_terms(numTrials, n, texts_already_ordered = False, verbose = False):
+# if cite_pair = True, returns the avg shared terms among patents where
+# one cites the other. if False, returns avg shared terms among two randomly
+# chosen patents
+def avg_shared_terms(numTrials, n, cite_pair = False, texts_already_ordered = False, verbose = False):
 	totSharedTerms = 0
 	selector = get_selector(texts_already_ordered)
 	
 	for i in range(numTrials):
+		if cite_pair:
+			pat1, pat2 = selector.ran
 		pat1, pat2 = selector.rand_pair()
 		shares = sharedTopN(pat1, pat2, n, returnWords = False, patCol_to_update=patns, verbose = verbose)
 		if shares > 0:
@@ -120,6 +124,18 @@ def avg_shared_terms(numTrials, n, texts_already_ordered = False, verbose = Fals
 			totSharedTerms += shares
 	return float(totSharedTerms)/numTrials
 
+# Like the above, but chooses only citation-pairs of patents
+def avg_shared_terms_cited(numTrials, n, texts_already_ordered = False, verbose = False):
+	totSharedTerms = 0
+		selector = get_selector(texts_already_ordered)
+		
+		for i in range(numTrials):
+			pat1, pat2 = selector.get_rand_cite()
+			shares = sharedTopN(pat1, pat2, n, returnWords = False, patCol_to_update=patns, verbose = verbose)
+			if shares > 0:
+				#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
+				totSharedTerms += shares
+		return float(totSharedTerms)/numTrials
 
 
 
