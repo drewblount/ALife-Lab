@@ -1,3 +1,6 @@
+# Memory optimization to-do: make it so unsorted text isn't always passed
+# around
+
 # Goal: order the words in a patent's text field by tf-idf (descending)
 
 # python treats dictionaries as unordered, and it's awkward to reorder
@@ -7,6 +10,7 @@
 from pymongo  import MongoClient
 from operator import attrgetter
 import randPat
+import time
 
 
 # for operations where a document's order is important,
@@ -16,6 +20,7 @@ import randPat
 
 patDB = MongoClient().patents
 patns = patDB.patns
+just_cites = patDB.just_cites
 
 
 # copies {key1: v1, key2: v2} into [{key: key1, v1}, {key: key2, v2}]
@@ -72,28 +77,49 @@ def orderAllTexts(disp= False, showN= 10):
 # Returns the number of words shared by the top n words in each patent
 # if returnWords is true, returns a list of the shared words. Otherwise
 # just returns the number of shared words.
-def sharedTopN(pat1, pat2, n, returnWords=False, patCol_to_update = False):
+
+# After running some rudimentary speed tests, I figured that the fastest
+# comparison was to transform pat1's top terms into a dict for fast word-
+# indexed lookup
+def sharedTopN(pat1, pat2, n, returnWords=False, patCol_to_update = False, verbose = False):
 	words1, words2 = topNTerms(pat1, n, patCol_to_update), topNTerms(pat2, n, patCol_to_update)
 	shCount = 0
 	shWords = []
-	for word1 in words1:
-		for word2 in words2:
-			if word1['word'] == word2['word']:
-				if returnWords: shWords.append(word1['word'])
-				else: shCount += 1
-				break
+	compare_dict = { word1['word']: True for word1 in words1 }
+	for word2 in words2:
+		if word2['word'] in compare_dict:
+			if returnWords or verbose:
+				shWords.append(word2['word'])
+			shCount += 1
+	if verbose and shCount > 0:
+		print '%d and %d share top term(s): %s' % (pat1['pno'], pat2['pno'], ', '.join(shWords))
+
 	if returnWords: return shWords
 	else: return shCount
 
-# for randomly selected pairs
-def aveSharedTopN(numTrials, n):
-	totSharedTerms = 0
-	selector = randPat.Selector(patns, projection={'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1})
 
+# If texts are already sorted, we save a lot of memory by
+# not retrieving the unsorted texts. Otherwise, those are retrieved
+# so that they can be sorted
+def get_selector(texts_already_ordered = False):
+	if texts_already_ordered:
+		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'sorted_text': 1, '_id': 0})
+	else:
+		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1, '_id': 0})
+
+
+def avg_shared_terms(numTrials, n, texts_already_ordered = False, verbose = False):
+	totSharedTerms = 0
+	selector = get_selector(texts_already_ordered)
+	
 	for i in range(numTrials):
-		pat1, pat2 = selector.randPat(), selector.randPat()
-		totSharedTerms += sharedTopN(pat1, pat2, n, patCol_to_update=patns)
+		pat1, pat2 = selector.rand_pair()
+		shares = sharedTopN(pat1, pat2, n, returnWords = False, patCol_to_update=patns, verbose = verbose)
+		if shares > 0:
+			#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
+			totSharedTerms += shares
 	return float(totSharedTerms)/numTrials
+
 
 
 
