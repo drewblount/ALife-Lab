@@ -60,25 +60,28 @@ def rand_doc(coll, proj = {}, randseed = time() % 10000):
 	return doc_near(coll, rno, proj)
 
 # Only performs well if coll is indexed by rand_id
-def n_docs_near(n, coll, num, proj):
+def n_docs_near(n, coll, num, proj, verbose = False):
+	
 	
 	if proj == {}:
 		ret = coll.find( { 'rand_id' : {'$gte' : num} } ).limit(n)
 		if not ret:
+			if verbose: print ret.count()
 			return coll.find( { 'rand_id' : {'$lt' : num} } ).limit(n)
 		else:
+			if verbose: print ret.count()
 			return ret
 	else:
 		ret = coll.find( { 'rand_id' : {'$gte' : rand} }, num ).limit(n)
 		if not ret:
+			if verbose: print ret.count()
 			return coll.find( { 'rand_id' : {'$lt' : rand} }, num ).limit(n)
 		else:
+			if verbose: print ret.count()
 			return ret
 
 def n_rand_docs(n, coll, randseed = time(), proj = {}):
-	print 'uff' + str(proj)
 	random.seed(randseed)
-	out = n_docs_near(n, coll, random.random(), proj)
 	return n_docs_near(n, coll, random.random(), proj)
 
 
