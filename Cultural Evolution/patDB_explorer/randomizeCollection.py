@@ -17,7 +17,7 @@ import random
 from time import time
 
 # 'coll' is a collection
-def create_rand_ids(coll):
+def create_rand_ids(coll, db = MongoClient().patents):
 	
 	# done in mongo's JS so the collection doesn't have to be
 	# passed from mongod to python and back; this uses mongo's
@@ -28,6 +28,8 @@ def create_rand_ids(coll):
 		bulk.find({}).update( {$set: {rand_id: Math.random() } } )
 		bulk.execute()
 		''' % {'name': coll.name}
+
+	db.eval(code)
 
 
 

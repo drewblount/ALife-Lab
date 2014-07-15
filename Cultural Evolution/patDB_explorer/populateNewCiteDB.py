@@ -2,7 +2,7 @@
 
 
 # CAREFUL: offset skips that many patents on each processor. Use with caution; check logs to make sure first few batches were empty (we only want to skip empty batches)
-offset = 100000
+offset = 0
 
 from pymongo import MongoClient, ASCENDING
 import multiprocessing
@@ -91,7 +91,7 @@ def backCite(startPno, endPno, coreNum=0):
 		# need to generate a new cursor for each bulk execution because cursors time out during bulk execs
 		logging.info("%d: Requesting cursor.", coreNum)
 		# bCited: null selects only those citatinos that haven't been back-cited yet, and have no defined bCited field
-		thesePats = thisCollection.find({'_id' : {'$gte' : start, '$lt': end}, 'bCited': null },
+		thesePats = thisCollection.find({'_id' : {'$gte' : start, '$lt': end}, 'bCited': None },
 										{'rawcites':1, '_id':1} ) #.batch_size(100000)
 		logging.info("%d: Cursor retrieved; initializing ordered bulk op", coreNum)
 		bulk = thisCollection.initialize_ordered_bulk_op()
@@ -149,8 +149,6 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-
 
 
 
