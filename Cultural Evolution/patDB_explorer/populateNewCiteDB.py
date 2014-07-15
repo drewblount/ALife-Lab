@@ -90,8 +90,8 @@ def backCite(startPno, endPno, coreNum=0):
 		# hopefully including 'citedby' will prevent mongod from digging through the HD to do each citedby update'
 		# need to generate a new cursor for each bulk execution because cursors time out during bulk execs
 		logging.info("%d: Requesting cursor.", coreNum)
-		thesePats = thisCollection.find({'pno' : {'$gte' : start, '$lt': end} },
-										{'rawcites':1, 'pno':1} ) #.batch_size(100000)
+		thesePats = thisCollection.find({'_id' : {'$gte' : start, '$lt': end} },
+										{'rawcites':1, '_id':1} ) #.batch_size(100000)
 		logging.info("%d: Cursor retrieved; initializing ordered bulk op", coreNum)
 		bulk = thisCollection.initialize_ordered_bulk_op()
 		count = 0
@@ -101,11 +101,11 @@ def backCite(startPno, endPno, coreNum=0):
 			# makes sure not to redraw citations
 			if 'bCited' not in citingPatn or citingPatn['bCited'] == False:
 				count += 1
-				citingNo = citingPatn['pno']
+				citingNo = citingPatn['_id']
 				
-				bulk.find( {'pno' : {'$in' : citingPatn['rawcites'] } } ).update( {'$push' : {'citedby': citingNo} } )
+				bulk.find( {'_id' : {'$in' : citingPatn['rawcites'] } } ).update( {'$push' : {'citedby': citingNo} } )
 				#
-				bulk.find( {'pno' : citingNo} ).update_one( {'$set': {'bCited' : True} })
+				bulk.find( {'_id' : citingNo} ).update_one( {'$set': {'bCited' : True} })
 
 		if count > 1:
 			logging.info("%d: %d patns with undrawn back-cites found; sending bulk.execute()", coreNum, count)
