@@ -34,7 +34,7 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 				# update item in the db, adding a field for the output of func(item)
 				out = func(item)
 				if out:
-					bulk.insert(out, manipulate=True, safe=None, check_keys=True, continue_on_error=True)
+					bulk.insert(out) #, manipulate=True, safe=None, check_keys=True, continue_on_error=True)
 					anyToAdd = True
 				if updateNum == updateFreq:
 					# every updateFreq number of updates, sends a batch to the db.

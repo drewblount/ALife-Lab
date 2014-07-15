@@ -90,7 +90,8 @@ def backCite(startPno, endPno, coreNum=0):
 		# hopefully including 'citedby' will prevent mongod from digging through the HD to do each citedby update'
 		# need to generate a new cursor for each bulk execution because cursors time out during bulk execs
 		logging.info("%d: Requesting cursor.", coreNum)
-		thesePats = thisCollection.find({'_id' : {'$gte' : start, '$lt': end} },
+		# bCited: null selects only those citatinos that haven't been back-cited yet, and have no defined bCited field
+		thesePats = thisCollection.find({'_id' : {'$gte' : start, '$lt': end}, 'bCited': null },
 										{'rawcites':1, '_id':1} ) #.batch_size(100000)
 		logging.info("%d: Cursor retrieved; initializing ordered bulk op", coreNum)
 		bulk = thisCollection.initialize_ordered_bulk_op()
@@ -99,7 +100,7 @@ def backCite(startPno, endPno, coreNum=0):
 		anyToAdd = False
 		for citingPatn in thesePats:
 			# makes sure not to redraw citations
-			if 'bCited' not in citingPatn or citingPatn['bCited'] == False:
+			if 'bCited' not in citingPatn or citingPatn['bCited'] != True:
 				count += 1
 				citingNo = citingPatn['_id']
 				
