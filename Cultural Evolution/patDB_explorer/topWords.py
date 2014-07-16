@@ -21,7 +21,6 @@ import time
 patDB = MongoClient().patents
 patns = patDB.patns
 just_cites = patDB.just_cites
-sel = get_selector()
 
 
 # copies {key1: v1, key2: v2} into [{key: key1, v1}, {key: key2, v2}]
@@ -108,6 +107,9 @@ def get_selector(texts_already_ordered = False):
 		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'sorted_text': 1, '_id': 0})
 	else:
 		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1, '_id': 0})
+
+
+sel = get_selector()
 
 
 # if citations = True, returns the avg shared terms among patents where
