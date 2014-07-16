@@ -71,12 +71,13 @@ class Selector(object):
 	# Set retryIfAbsent to False if the collection contains relatively
 	# few pnos between min_pno and max_pno; this results in a non-uniform
 	# random distribution
-	def rand_pat(self, retryIfAbsent=True):
+	# enforce_func is a boolean function which must eval to tr
+	def rand_pat(self, retryIfAbsent=True, enforce_func=self.return_true):
 		rand_pno = random.randint(self.min_pno, self.max_pno)
 		if self.verbose: print 'rand pno is ' + str(rand_pno)
 		randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
 		if retryIfAbsent:
-			while not randy:
+			while not randy or not enforce_func(randy):
 				rand_pno = random.randint(self.min_pno, self.max_pno)
 				randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
 		return randy
@@ -106,7 +107,7 @@ class Selector(object):
 			return self.get_rand_cite()
 		else:
 			return self.rand_pair()
-			
+
 	# required_fields is a list of strings, each string is the name
 	# of a field that must be in each of the returned patents
 	def get_rand_cite(required_fields = []):
@@ -130,3 +131,14 @@ class Selector(object):
 
 
 #	def rand_cite_pair(self):
+
+	def return_true(self, input): return True
+
+	# kludgey; work-around for the bizarre fact that some patents in the db
+	# don't have tf-idfs stored
+	def has_tf_idfs(self, pat):
+		if 'text' not in pat: return False
+		for word in pat['text']:
+			if 'tf-idf' in word: return True
+			else: return False
+
