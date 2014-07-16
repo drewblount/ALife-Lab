@@ -76,8 +76,10 @@ class Selector(object):
 		
 		self.col = patCol
 		self.proj = projection
-		self.rand_cites = []
 		self.cite_buf_size = buf_size
+			
+		self.rand_cites = self.stock_n_cite_pairs(self.cite_buf_size)
+
 	
 	
 	# randomly chooses a patent number in the pno range covered by
