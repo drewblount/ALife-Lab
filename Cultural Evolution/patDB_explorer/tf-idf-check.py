@@ -16,9 +16,9 @@ def return_updated_text(patn):
 	if has_tf_idfs(patn):
 		return
 	else:
-	for word in patn['text']:
-		idf = patDB.corpusDict.find_one({'_id': word})['value']['idf']
-		patn['text'][word]['tf-idf'] = patn['text'][word]['tf'] * idf
+		for word in patn['text']:
+			idf = patDB.corpusDict.find_one({'_id': word})['value']['idf']
+			patn['text'][word]['tf-idf'] = patn['text'][word]['tf'] * idf
 	return( {'$set': {'text' : patn['text'] } } )
 
 def check_tf_idfs(pats):
