@@ -7,7 +7,6 @@ from randomizeCollection import rand_doc, n_rand_docs
 patDB = MongoClient().patents
 patns = patDB.patns
 just_cites = patDB.just_cites
-sel = get_selector()
 
 patns.ensure_index('pno')
 

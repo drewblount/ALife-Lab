@@ -21,6 +21,7 @@ import time
 patDB = MongoClient().patents
 patns = patDB.patns
 just_cites = patDB.just_cites
+sel = get_selector()
 
 
 # copies {key1: v1, key2: v2} into [{key: key1, v1}, {key: key2, v2}]
