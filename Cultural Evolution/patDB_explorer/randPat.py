@@ -107,7 +107,7 @@ class Selector(object):
 	
 	# given a just_cite doc of the form {src: pno, cte: pno},
 	# returns both patents
-	def just_cite_to_patns(cite):
+	def just_cite_to_patns(self, cite):
 		source = patns.find_one({'pno':cite['src']}, self.proj)
 		cited  = patns.find_one({'pno':cite['cte']}, self.proj)
 		return (source, cited)
@@ -129,7 +129,7 @@ class Selector(object):
 			self.stock_n_cite_pairs(self.cite_buf_size)
 		# HOW DO I POP from an array?
 		citation = self.rand_cites.pop()
-		p1, p2 = just_cite_to_patns(citation)
+		p1, p2 = self.just_cite_to_patns(citation)
 		
 		if enforce_func(p1) and enforce_func(p2): return (p1,p2)
 		# Try again if one of the patents fails the required test
