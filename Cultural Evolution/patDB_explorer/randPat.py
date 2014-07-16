@@ -1,14 +1,3 @@
-from pymongo  import MongoClient, ASCENDING, DESCENDING
-from bson.code import Code
-import random
-from randomizeCollection import rand_doc, n_rand_docs
-
-
-patDB = MongoClient().patents
-patns = patDB.patns
-just_cites = patDB.just_cites
-
-patns.ensure_index('pno')
 
 # a random patent selector. 'projection' is a mongodb projection
 # which describes which fields to return; if left {} the entire
@@ -16,13 +5,6 @@ patns.ensure_index('pno')
 
 # buf_size is the number of citation links {src: pno, cte: pno} are
 # stored by the selector at a time (to reduce calls to the cite db)
-class Selector(object):
-    
-    def __init__(self, patCol, projection = {'_id':0}, rand_seed = None, db = patDB, verbose = False, buf_size = 10000):
-        
-        if not db.pat_metadata.find_one({'_id': 'max_pno'}):
-			import maxmin
-			maxmin.storeMaxMinPno(db)
 
 from pymongo  import MongoClient, ASCENDING, DESCENDING
 from bson.code import Code
@@ -78,7 +60,7 @@ class Selector(object):
 		self.proj = projection
 		self.cite_buf_size = buf_size
 			
-		self.rand_cites = self.stock_n_cite_pairs(self.cite_buf_size)
+		self.rand_cites = n_rand_docs( buf_size, just_cites )
 
 	
 	
