@@ -7,6 +7,7 @@ from randomizeCollection import rand_doc, n_rand_docs
 patDB = MongoClient().patents
 patns = patDB.patns
 just_cites = patDB.just_cites
+sel = get_selector()
 
 patns.ensure_index('pno')
 
@@ -125,7 +126,7 @@ class Selector(object):
 	# enforce_func is a boolean test each patent must pass to be
 	# returned
 	def get_rand_cite(self, enforce_func = has_tf_idfs):
-		if not self.rand_cites.has_next():
+		if not self.rand_cites.alive():
 			self.stock_n_cite_pairs(self.cite_buf_size)
 
 		citation = self.rand_cites.next()
