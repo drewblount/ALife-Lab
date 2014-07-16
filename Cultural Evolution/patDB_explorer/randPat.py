@@ -124,16 +124,16 @@ class Selector(object):
 
 	# enforce_func is a boolean test each patent must pass to be
 	# returned
-	def get_rand_cite(enforce_func = has_tf_idfs):
+	def get_rand_cite(self, enforce_func = has_tf_idfs):
 		if self.rand_cites == []:
-			stock_n_cite_pairs(buf_size)
+			self.stock_n_cite_pairs(buf_size)
 		# HOW DO I POP from an array?
 		citation = self.rand_cites.pop()
 		p1, p2 = just_cite_to_patns(citation)
 		
 		if enforce_func(p1) and enforce_func(p2): return (p1,p2)
 		# Try again if one of the patents fails the required test
-		else: return get_rand_cite(enforce_func)
+		else: return self.get_rand_cite(enforce_func)
 
 
 
