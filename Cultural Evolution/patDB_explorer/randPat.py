@@ -109,7 +109,7 @@ class Selector(object):
 	# enforce_func is a boolean test each patent must pass to be
 	# returned
 	def get_rand_cite(self, enforce_func = has_tf_idfs):
-		if not self.rand_cites.alive():
+		if not self.rand_cites.alive:
 			self.stock_n_cite_pairs(self.cite_buf_size)
 
 		citation = self.rand_cites.next()
