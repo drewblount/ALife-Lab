@@ -40,11 +40,11 @@ def parallel_rand_ids(coll, verbose = False):
 				in_collection = coll,
 				out_collection= coll,
 				findArgs = {'spec': {}, 'fields': {'_id': 1}},
-				updateFreq = 10000)
+				updateFreq = 100)
 	t1 = time()
 	dt = t1 - t0
 	
-	if verbose: print ('took %f seconds; if the db was of size 40 mil, translates to %f minutes') % (dt, dt*40000000/coll.count() )
+	if verbose: print ('took %f seconds; if the db was of size 40 mil, translates to %f minutes') % (dt, dt*40000000/coll.count()/60 )
 
 def index_rand_ids(coll):
 	coll.ensure_index( 'rand_id' )

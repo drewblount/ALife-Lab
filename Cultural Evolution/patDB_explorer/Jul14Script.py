@@ -1,8 +1,6 @@
 from pymongo import MongoClient
-from populateNewCiteDB import drawBackCites
-from makeCiteDB import storeAllCites
 from datetime import datetime
-from randomizeCollection import create_rand_ids, index_rand_ids
+from randomizeCollection import create_rand_ids, index_rand_ids, parallel_rand_ids
 
 
 patDB = MongoClient().patents
@@ -18,7 +16,7 @@ patns = patDB.patns
 
 import randomizeCollection
 print str(datetime.now()) + ' CREATING RAND IDS'
-parallel_rand_ids(just_cites)
+parallel_rand_ids(just_cites, verbose = True)
 print str(datetime.now()) + ' INDEXING RAND IDS'
 index_rand_ids(just_cites)
 

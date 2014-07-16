@@ -26,7 +26,10 @@ def parallelMap(func, in_collection, out_collection, in_id_field = '_id', out_id
 			if staggerThreads:
 				updateNum += random.randint(0, updateFreq - 1)
 			
+			to_update = False
+			
 			for item in cursor:
+				to_update = True
 				updateNum += 1
 				# update item in the db, adding a field for the output of func(item)
 				bulk.find({out_id_field: item[in_id_field]}).update_one(func(item))
@@ -36,8 +39,9 @@ def parallelMap(func, in_collection, out_collection, in_id_field = '_id', out_id
 					# I was getting errors that 'Bulk options can only be executed once'
 					bulk = assignBulk()
 					updateNum = 0
+					to_update = False
 			# make sure a final execute is done
-			bulk.execute()
+			if to_update: bulk.execute()
 	
 	else:
 		def partFunc(cursor):
