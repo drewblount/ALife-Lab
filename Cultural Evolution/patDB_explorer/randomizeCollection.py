@@ -15,6 +15,7 @@
 from pymongo import MongoClient, GEO2D
 import random
 from time import time
+from datetime import datetime
 
 # 'coll' is a collection
 def create_rand_ids(coll, db = MongoClient().patents):
