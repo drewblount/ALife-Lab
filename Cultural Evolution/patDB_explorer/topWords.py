@@ -36,9 +36,9 @@ def dictToArray(D, keylabel = "key"):
 
 # For a patent, produces an array of the words in that patent's text
 # in descending tf-idf order
-def createSortedText(patn):
+def createSortedText(patn, verbose = False):
 	textArray = dictToArray(patn['text'], keylabel='word')
-	print patn['pno']
+	if verbose: print patn['pno']
 	sortedTextArray = sorted(textArray, key=lambda w: w['tf-idf'], reverse = True)
 	return sortedTextArray
 
