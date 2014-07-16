@@ -24,9 +24,7 @@ def create_rand_ids(coll, db = MongoClient().patents):
 	# random number generator, not python's
 	
 	code = '''
-		var bulk = db.%(name)s.initializeUnorderedBulkOp()
-		bulk.find({}).update( {$set: {rand_id: Math.random() } } )
-		bulk.execute()
+		db.%(name)s.find({},{_id:1}).forEach( function(doc) { db.cite_net.update({_id:doc._id},{$set : {"rand_id":Math.random()}}) })
 		''' % {'name': coll.name}
 
 	db.eval(code)
@@ -80,7 +78,7 @@ def n_docs_near(n, coll, num, proj, verbose = False):
 			if verbose: print ret.count()
 			return ret
 
-def n_rand_docs(n, coll, randseed = time(), proj = {}):
+def n_rand_docs(n, coll, randseed = time(), proj = {}, verbose = True):
 	random.seed(randseed)
 	return n_docs_near(n, coll, random.random(), proj)
 
