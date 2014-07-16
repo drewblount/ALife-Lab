@@ -22,7 +22,7 @@ def return_updated_text(patn):
 	return( {'$set': {'text' : patn['text'] } } )
 
 def check_tf_idfs(pats):
-	parallelMap(tf_idf_onePat, patDB.patns,
+	parallelMap(return_updated_text, pats,
 				findArgs = {'spec': {}, 'fields': {'text': 1} },
 				updateFreq = 5000,
 				bSize = 5000)
