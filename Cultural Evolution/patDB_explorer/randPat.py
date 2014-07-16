@@ -100,6 +100,13 @@ class Selector(object):
 	def stock_n_cite_pairs(self, n):
 		self.rand_cites.append( n_rand_docs( n, just_cites ) )
 	
+	# depending on the input arg, returns rand_pair or rand_cite
+	def get_pair(self, is_citepair):
+		if is_citepair:
+			return self.get_rand_cite()
+		else:
+			return self.rand_pair()
+			
 	# required_fields is a list of strings, each string is the name
 	# of a field that must be in each of the returned patents
 	def get_rand_cite(required_fields = []):
