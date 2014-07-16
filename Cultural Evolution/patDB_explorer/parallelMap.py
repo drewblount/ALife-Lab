@@ -32,14 +32,19 @@ def parallelMap(func, in_collection, out_collection, in_id_field = '_id', out_id
 				to_update = True
 				updateNum += 1
 				# update item in the db, adding a field for the output of func(item)
-				bulk.find({out_id_field: item[in_id_field]}).update_one(func(item))
+				
+				out = func(item)
+				if out:
+					to_update = True
+					bulk.find({out_id_field: item[in_id_field]}).update_one(out)
 				if updateNum == updateFreq:
+					bulk.find({out_id_field: item[in_id_field]}).update_one(func(item))
 					# every updateFreq number of updates, sends a batch to the db.
-					bulk.execute()
-					# I was getting errors that 'Bulk options can only be executed once'
-					bulk = assignBulk()
-					updateNum = 0
-					to_update = False
+					if to_update:
+						bulk.execute()
+						# I was getting errors that 'Bulk options can only be executed once'
+						bulk = assignBulk()
+						to_update = False
 			# make sure a final execute is done
 			if to_update: bulk.execute()
 	
