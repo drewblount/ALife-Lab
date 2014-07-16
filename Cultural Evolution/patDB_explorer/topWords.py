@@ -38,7 +38,7 @@ def dictToArray(D, keylabel = "key"):
 # in descending tf-idf order
 def createSortedText(patn):
 	textArray = dictToArray(patn['text'], keylabel='word')
-	print textArray
+	print patn['pno']
 	sortedTextArray = sorted(textArray, key=lambda w: w['tf-idf'], reverse = True)
 	return sortedTextArray
 
@@ -112,7 +112,7 @@ def get_selector(texts_already_ordered = False):
 # if citations = True, returns the avg shared terms among patents where
 # one cites the other. if False, returns avg shared terms among two randomly
 # chosen patents
-def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = False, verbose = False):
+def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = False, verbose = False, enforce_fields = []):
 	totSharedTerms = 0
 	selector = get_selector(texts_already_ordered)
 	
