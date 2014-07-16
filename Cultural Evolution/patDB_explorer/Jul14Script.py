@@ -18,7 +18,7 @@ patns = patDB.patns
 
 import randomizeCollection
 print str(datetime.now()) + ' CREATING RAND IDS'
-create_rand_ids(just_cites)
+parallel_rand_ids(just_cites)
 print str(datetime.now()) + ' INDEXING RAND IDS'
 index_rand_ids(just_cites)
 

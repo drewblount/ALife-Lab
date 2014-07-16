@@ -16,6 +16,7 @@ from pymongo import MongoClient, GEO2D
 import random
 from time import time
 from datetime import datetime
+from parallelMap import parallelMap
 
 # 'coll' is a collection
 def create_rand_ids(coll, db = MongoClient().patents):
@@ -30,7 +31,20 @@ def create_rand_ids(coll, db = MongoClient().patents):
 
 	db.eval(code)
 
+def return_rand_id(doc):
+	return {'$set': {'rand_id' : random.random() } }
 
+def parallel_rand_ids(coll, verbose = False):
+	t0 = time()
+	parallelMap(return_rand_id,
+				in_collection = coll,
+				out_collection= coll,
+				findArgs = {'spec': {}, 'fields': {'_id': 1}},
+				updateFreq = 10000)
+	t1 = time()
+	dt = t1 - t0
+	
+	if verbose: print ('took %f seconds; if the db was of size 40 mil, translates to %f minutes') % (dt, dt*40000000/coll.count() )
 
 def index_rand_ids(coll):
 	coll.ensure_index( 'rand_id' )
