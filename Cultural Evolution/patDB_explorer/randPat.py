@@ -77,7 +77,7 @@ class Selector(object):
 		self.col = patCol
 		self.proj = projection
 		self.rand_cites = []
-		self.rand_cite_size = buf_size
+		self.cite_buf_size = buf_size
 	
 	
 	# randomly chooses a patent number in the pno range covered by
@@ -126,7 +126,7 @@ class Selector(object):
 	# returned
 	def get_rand_cite(self, enforce_func = has_tf_idfs):
 		if self.rand_cites == []:
-			self.stock_n_cite_pairs(buf_size)
+			self.stock_n_cite_pairs(self.cite_buf_size)
 		# HOW DO I POP from an array?
 		citation = self.rand_cites.pop()
 		p1, p2 = just_cite_to_patns(citation)
