@@ -36,6 +36,20 @@ just_cites = patDB.just_cites
 
 patns.ensure_index('pno')
 
+
+#	def rand_cite_pair(self):
+
+def return_true(input): return True
+
+# kludgey; work-around for the bizarre fact that some patents in the db
+# don't have tf-idfs stored
+def has_tf_idfs(pat):
+	if 'text' not in pat: return False
+	for word in pat['text']:
+		if 'tf-idf' in pat['text'][word]: return True
+		else: return False
+
+
 # a random patent selector. 'projection' is a mongodb projection
 # which describes which fields to return; if left {} the entire
 # patent will be returned.
@@ -72,7 +86,7 @@ class Selector(object):
 	# few pnos between min_pno and max_pno; this results in a non-uniform
 	# random distribution
 	# enforce_func is a boolean function which must eval to tr
-	def rand_pat(self, retryIfAbsent=True, enforce_func=return_true):
+	def rand_pat(self, retryIfAbsent=True, enforce_func=has_tf_idfs):
 		rand_pno = random.randint(self.min_pno, self.max_pno)
 		if self.verbose: print 'rand pno is ' + str(rand_pno)
 		randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
@@ -108,37 +122,20 @@ class Selector(object):
 		else:
 			return self.rand_pair()
 
-	# required_fields is a list of strings, each string is the name
-	# of a field that must be in each of the returned patents
-	def get_rand_cite(required_fields = []):
+	# enforce_func is a boolean test each patent must pass to be
+	# returned
+	def get_rand_cite(enforce_func = has_tf_idfs):
 		if self.rand_cites == []:
 			stock_n_cite_pairs(buf_size)
 		# HOW DO I POP from an array?
 		citation = self.rand_cites.pop()
 		p1, p2 = just_cite_to_patns(citation)
 		
-		have_fields = True
-		for field in required_fields:
-			if field not in p1 or field not in p2:
-				have_fields = False
-				break
-		
-		if have_fields: return (p1,p2)
-		# Try again if one of the patents is missing a required field
-		else: return get_rand_cite(required_fields)
+		if enforce_func(p1) and enforce_func(p2): return (p1,p2)
+		# Try again if one of the patents fails the required test
+		else: return get_rand_cite(enforce_func)
 
 
 
 
-#	def rand_cite_pair(self):
-
-def return_true(self, input): return True
-
-# kludgey; work-around for the bizarre fact that some patents in the db
-# don't have tf-idfs stored
-def has_tf_idfs(self, pat):
-	if 'text' not in pat: return False
-	for word in pat['text']:
-		if 'tf-idf' in word: return True
-		else: return False
 
