@@ -93,7 +93,7 @@ class Selector(object):
 	# returns both patents
 	def just_cite_to_patns(self, cite):
 		source = patns.find_one({'pno':cite['src']}, self.proj)
-		cited  = patns.find_one({'pno':cite['cte']}, self.proj)
+		cited  = patns.find_one({'pno':cite['ctd']}, self.proj)
 		return (source, cited)
 	
 	def stock_n_cite_pairs(self, n):
