@@ -38,6 +38,7 @@ def dictToArray(D, keylabel = "key"):
 # in descending tf-idf order
 def createSortedText(patn):
 	textArray = dictToArray(patn['text'], keylabel='word')
+	print textArray
 	sortedTextArray = sorted(textArray, key=lambda w: w['tf-idf'], reverse = True)
 	return sortedTextArray
 
