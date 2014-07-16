@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from parallelMap import parallelMap
 
 patDB = MongoClient().patents
-patns = .patns
+patns = patDB.patns
 
 
 def has_tf_idfs(pat):
