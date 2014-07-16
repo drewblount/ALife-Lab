@@ -10,7 +10,7 @@
 from pymongo  import MongoClient
 from operator import attrgetter
 import randPat
-import time
+from time import time
 
 
 # for operations where a document's order is important,
@@ -128,6 +128,18 @@ def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = Fa
 			#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
 			totSharedTerms += shares
 	return float(totSharedTerms)/numTrials
+
+def timeFunc(func, input):
+	t0 = time()
+	output = func(input)
+	print 'took %f seconds' % (time() - t0)
+	return output
+
+#curried avg_shared_terms for easy, kludgey timing
+def ast10tc(numTrials):
+	avg_shared_terms(numTrials,10,citations=False)
+
+
 
 
 
