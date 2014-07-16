@@ -42,6 +42,12 @@ def createSortedText(patn, verbose = False):
 	sortedTextArray = sorted(textArray, key=lambda w: w['tf-idf'], reverse = True)
 	return sortedTextArray
 
+def has_tf_idfs(pat):
+	if 'text' not in pat: return False
+	for word in pat['text']:
+		if 'tf-idf' in pat['text'][word]: return True
+		else: return False
+
 
 def perLineArrayDisplay(arr):
 	for elem in arr:
@@ -70,9 +76,15 @@ def topNTerms(patn, n, patCol_to_update = False, display=False):
 
 
 def orderAllTexts(disp= False, showN= 10):
-	pats = patns.find({}, {'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1})
-	for pat in pats:
-		topNTerms(pat, showN, display=disp, patCol_to_update=patns)
+	parallelMap(return_rand_id,
+				in_collection = coll,
+				out_collection= coll,
+				findArgs = {'spec': {'sorted_text': {'$exists': False}}, 'fields': {'_id': 1}},
+				updateFreq = 5000,
+				bSize = 5000)
+
+def orderOneText(patn):
+	return {'$set': {'sorted_text': createSortedText(patn)} }
 
 
 # Returns the number of words shared by the top n words in each patent
@@ -98,6 +110,26 @@ def sharedTopN(pat1, pat2, n, returnWords=False, patCol_to_update = False, verbo
 	if returnWords: return shWords
 	else: return shCount
 
+# spits out an array of {wordSharedByBothPats, source_tf-idf, cite_tf-idf}
+# so that we can find avg tf_idfs of shared terms
+def compareTopN(sourceP, citeP, n, patCol_to_update = False, verbose = False):
+	if not (has_tf_idfs(sourceP) and has_tf_idfs(citeP)):
+		return 'error: no tf_idfs to compare between patns %d and %d.' % (sourceP['pno'],citeP['pno'])
+	words1, words2 = topNTerms(sourceP, n, patCol_to_update), topNTerms(citeP, n, patCol_to_update)
+	shCount = 0
+	shWords = []
+	# below line will break if words1 doesn't have tf_idfs
+	compare_dict = { word1['word']: word1['tf-idf'] for word1 in words1 }
+	for word2 in words2:
+		if word2['word'] in compare_dict:
+			res = { 'word': word2['word'], 'src_tf-idf': compare_dict[word2['word']], 'ctd_tf-idf': word2['tf-idf'] }
+			shCount += 1
+	if verbose and shCount > 0:
+		print '%d and %d share top term(s): %s' % (pat1['pno'], pat2['pno'], ', '.join(shWords))
+	
+	return shWords
+
+
 
 # If texts are already sorted, we save a lot of memory by
 # not retrieving the unsorted texts. Otherwise, those are retrieved
@@ -115,7 +147,7 @@ sel = get_selector()
 # if citations = True, returns the avg shared terms among patents where
 # one cites the other. if False, returns avg shared terms among two randomly
 # chosen patents
-def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = False, verbose = False, enforce_fields = []):
+def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = False, verbose = False):
 	totSharedTerms = 0
 	selector = get_selector(texts_already_ordered)
 	
@@ -139,9 +171,31 @@ def timeFunc(func, input):
 def ast10tc(numTrials):
 	return avg_shared_terms(numTrials,10,citations=True)
 
+def avg_tf_idf_shared_terms(numTrials, n, citations = True, texts_already_ordered = False, verbose = False):
 
+	sh_terms = []
+	selector = get_selector(texts_already_ordered)
 
+	for i in range(numTrials):
+		pat1, pat2 = selector.get_pair(citations)
+		sh_terms += compareTopN(pat1, pat2, n)
 
+	num_terms = len(sh_terms)
+	if num_terms == 0:
+		if verbose: print 'no shared terms found'
+		return (0, 0)
+
+	tot_src_tf_idf = sum(word['src_tf-idf'] for word in sh_terms)
+	tot_ctd_tf_idf = sum(word['ctd_tf-idf'] for word in sh_terms)
+
+	avg_src_tf_idf = tot_src_tf_idf / num_terms
+	avg_ctd_tf_idf = tot_ctd_tf_idf / num_terms
+
+	if verbose:
+		print 'From %d cite pairs, %d shared terms were found in the top %d terms between parent and child. The average tf_idf of these shared terms in the cited patents (parents) was %f. The average tf_idf of these shared terms in the source patents (children) was %f.' %(num_terms, n, avg_ctd_tf_idf, avg_src_tf_idf)
+
+	print 'sh_terms'
+	return (avg_src_tf_idf, avg_ctd_tf_idf)
 
 
 

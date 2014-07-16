@@ -25,11 +25,6 @@ def return_true(input): return True
 
 # kludgey; work-around for the bizarre fact that some patents in the db
 # don't have tf-idfs stored
-def has_tf_idfs(pat):
-	if 'text' not in pat: return False
-	for word in pat['text']:
-		if 'tf-idf' in pat['text'][word]: return True
-		else: return False
 
 
 # a random patent selector. 'projection' is a mongodb projection
