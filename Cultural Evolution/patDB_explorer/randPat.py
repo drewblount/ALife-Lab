@@ -113,7 +113,7 @@ class Selector(object):
 		return (source, cited)
 	
 	def stock_n_cite_pairs(self, n):
-		self.rand_cites.append( n_rand_docs( n, just_cites ) )
+		self.rand_cites = n_rand_docs( n, just_cites )
 	
 	# depending on the input arg, returns rand_pair or rand_cite
 	def get_pair(self, is_citepair):
@@ -125,10 +125,10 @@ class Selector(object):
 	# enforce_func is a boolean test each patent must pass to be
 	# returned
 	def get_rand_cite(self, enforce_func = has_tf_idfs):
-		if self.rand_cites == []:
+		if not self.rand_cites.has_next():
 			self.stock_n_cite_pairs(self.cite_buf_size)
-		# HOW DO I POP from an array?
-		citation = self.rand_cites.pop()
+
+		citation = self.rand_cites.next()
 		p1, p2 = self.just_cite_to_patns(citation)
 		
 		if enforce_func(p1) and enforce_func(p2): return (p1,p2)
