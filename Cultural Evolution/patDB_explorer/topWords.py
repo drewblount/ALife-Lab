@@ -137,7 +137,7 @@ def timeFunc(func, input):
 
 #curried avg_shared_terms for easy, kludgey timing
 def ast10tc(numTrials):
-	avg_shared_terms(numTrials,10,citations=False)
+	return avg_shared_terms(numTrials,10,citations=False)
 
 
 
