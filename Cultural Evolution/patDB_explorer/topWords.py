@@ -11,6 +11,7 @@ from pymongo  import MongoClient
 from operator import attrgetter
 import randPat
 from time import time
+from parallelMap import parallelMap
 
 
 # for operations where a document's order is important,
@@ -74,17 +75,18 @@ def topNTerms(patn, n, patCol_to_update = False, display=False):
 			displaySortedWord(word)
 	return patn['sorted_text'][:n]
 
+def orderOneText(patn):
+	return {'$set': {'sorted_text': createSortedText(patn)} }
 
-def orderAllTexts(disp= False, showN= 10):
-	parallelMap(return_rand_id,
+
+def orderAllTexts(coll):
+	parallelMap(orderOneText,
 				in_collection = coll,
 				out_collection= coll,
-				findArgs = {'spec': {'sorted_text': {'$exists': False}}, 'fields': {'_id': 1}},
+				findArgs = {'spec': {'sorted_text': {'$exists': False}, 'text': {'$exists': True}}, 'fields': {'_id': 0, 'text': 1}},
 				updateFreq = 5000,
 				bSize = 5000)
 
-def orderOneText(patn):
-	return {'$set': {'sorted_text': createSortedText(patn)} }
 
 
 # Returns the number of words shared by the top n words in each patent
