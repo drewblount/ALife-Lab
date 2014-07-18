@@ -42,7 +42,7 @@ def has_tf_idfs(pat):
 # stored by the selector at a time (to reduce calls to the cite db)
 class Selector(object):
 	
-	def __init__(self, patCol, projection = {'_id':0}, rand_seed = None, db = patDB, verbose = False, buf_size = 10000):
+	def __init__(self, patCol = patns, projection = {'_id':0}, rand_seed = None, db = patDB, verbose = False, buf_size = 10000):
 		
 		if not db.pat_metadata.find_one({'_id': 'max_pno'}):
 			import maxmin
@@ -121,7 +121,10 @@ class Selector(object):
 		# Try again if one of the patents fails the required test
 		else: return self.get_rand_cite(enforce_func)
 
-
+	def rand_pnos(self, n, sort = False):
+		pnos = random.sample( range( self.min_pno, self.max_pno ), n )
+		if sort: pnos = sorted(pnos)
+		return pnos
 
 
 

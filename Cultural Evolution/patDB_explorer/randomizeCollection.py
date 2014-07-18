@@ -73,22 +73,27 @@ def rand_doc(coll, proj = {}, randseed = time() % 10000):
 	return doc_near(coll, rno, proj)
 
 # Only performs well if coll is indexed by rand_id
-def n_docs_near(n, coll, num, proj, verbose = False):
+def n_docs_near(n, coll, num, query = {}, proj = {}, verbose = False):
+	
+	find_query = { 'rand_id' : {'$gte' : num} }
+	alt_query = { 'rand_id' : {'$lt' : num} }
+	find_query.update(query)
+	alt_query.update(query)
 	
 	
 	if proj == {}:
-		ret = coll.find( { 'rand_id' : {'$gte' : num} } ).limit(n)
+		ret = coll.find( find_query ).limit(n)
 		if not ret:
 			if verbose: print ret.count()
-			return coll.find( { 'rand_id' : {'$lt' : num} } ).limit(n)
+			return coll.find( alt_query ).limit(n)
 		else:
 			if verbose: print ret.count()
 			return ret
 	else:
-		ret = coll.find( { 'rand_id' : {'$gte' : rand} }, num ).limit(n)
+		ret = coll.find( find_query, proj ).limit(n)
 		if not ret:
 			if verbose: print ret.count()
-			return coll.find( { 'rand_id' : {'$lt' : rand} }, num ).limit(n)
+			return coll.find( alt_query, proj ).limit(n)
 		else:
 			if verbose: print ret.count()
 			return ret
