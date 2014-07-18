@@ -20,9 +20,8 @@
 from pymongo  import MongoClient
 from bson.code import Code
 
-patDB = MongoClient().patents
-patns = patDB.patns
-just_cites = patDB.just_cites
+
+execfile('../randPat.py')
 
 # concatenates arrays stored in dictionaries. The input arg lists
 # is of the form { key: {vals: [list]}, key: {vals: [list]}, ... }
@@ -51,7 +50,8 @@ def tf_idf_comb(top_n):
 		    out_arr[i] = this.sorted_text[i]['tf-idf']
 		  };
 		  emit("tf-idf", {'vals':out_arr})
-		}
+		};
+
 		''' % top_n )
 
 	return (patns.inline_map_reduce(map, concat_list_reduce, query = {'sorted_text': {'$exists': True} } ) )[0]['value']['vals']
@@ -60,5 +60,12 @@ def save_csv(value_array, out_file_name):
 	outf = open(out_file_name, "w")
 	outf.write(','.join( map(str,value_array) ) )
 	outf.close()
+
+
+# Goal: tf_idf_comb
+#def cited_tf_idf_comb(top_n):
+
+
+
 
 
