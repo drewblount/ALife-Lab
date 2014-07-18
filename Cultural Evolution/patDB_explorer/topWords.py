@@ -83,7 +83,7 @@ def orderAllTexts(coll):
 	parallelMap(orderOneText,
 				in_collection = coll,
 				out_collection= coll,
-				findArgs = {'spec': {'sorted_text': {'$exists': False}, 'text': {'$exists': True}}, 'fields': {'_id': 0, 'text': 1}},
+				findArgs = {'spec': {'sorted_text': {'$exists': False}, 'text': {'$exists': True}}, 'fields': {'text': 1}},
 				updateFreq = 5000,
 				bSize = 5000)
 
