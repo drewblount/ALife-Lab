@@ -45,14 +45,12 @@ concat_list_reduce = Code('''
 def tf_idf_comb(top_n):
 	map = Code('''
 		function() {
-		  if ("sorted_text" in this) {
-		    var to_return = Math.min(%d, this.sorted_text.length);
-			var out_arr = [];
-			for (var i = 0; i < to_return; i++) {
-		      out_arr[i] = this.sorted_text[i]['tf-idf']
-		    };
-		    emit("tf-idf", {'vals':out_arr})
+		  var to_return = Math.min(%d, this.sorted_text.length);
+		  var out_arr = [];
+		  for (var i = 0; i < to_return; i++) {
+		    out_arr[i] = this.sorted_text[i]['tf-idf']
 		  };
+		  emit("tf-idf", {'vals':out_arr})
 		}
 		''' % top_n )
 
