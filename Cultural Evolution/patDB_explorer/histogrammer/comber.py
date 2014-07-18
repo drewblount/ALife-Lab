@@ -56,5 +56,11 @@ def tf_idf_comb(top_n):
 		}
 		''' % top_n )
 
-	return patns.inline_map_reduce(map, concat_list_reduce)
+	return (patns.inline_map_reduce(map, concat_list_reduce))[0]['value']['vals']
+
+def save_csv(value_array, out_file_name):
+	outf = open(out_file_name, "w")
+	outf.write(','.join( map(str,value_array) ) )
+	outf.close()
+
 
