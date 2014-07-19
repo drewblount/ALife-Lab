@@ -21,10 +21,15 @@ from pymongo  import MongoClient
 from bson.code import Code
 import randPat
 import topWords
+import os
 
 patDB = MongoClient().patents
 patns = patDB.patns
 just_cites = patDB.just_cites
+metadata = patDB.pat_metadata
+
+glob_max = metadata.find_one({'_id':'max_pno'})['val']
+glob_min = metadata.find_one({'_id':'min_pno'})['val']
 
 
 '''	  for (obj in lists) {
@@ -80,13 +85,12 @@ def top_upto_n_map(n):
 	# I'll admit I have no idea why I have n+1 as to_return here instead of n
 	# as in top_n_map, but empirically it's what works
 
-
-
 # Returns a list of every top_n tf-idf value (but none of the words)
 # min_pno is an inclusive bound and max_pno is exclusive
 # pno_subset, if included, is a list of pnos to be combed
 # if up_to_n, will return n arrays of the tf-idfs of top1 terms, top2,..., topN
-def tf_idf_comb(top_n, up_to_n = False, min_pno=None, max_pno=None, pno_subset=None):
+# lim limits the number of documents looked at
+def tf_idf_comb(top_n, up_to_n = False, min_pno=None, max_pno=None, pno_subset=None, lim=None):
 	
 	query_arg = {'sorted_text': {'$exists': True}}
 
@@ -125,16 +129,44 @@ def tf_idf_comb(top_n, up_to_n = False, min_pno=None, max_pno=None, pno_subset=N
 	else: return out[0]['value']['vals']
 
 
-def save_csv(value_array, out_file_name):
-	outf = open(out_file_name + '.csv', "w")
+def save_csv(value_array, out_name):
+	outf = open(out_name + '.csv', 'w+')
 	outf.write(','.join( map(str,value_array) ) )
 	outf.close()
 
-def save_csvs(list_of_value_arrays, out_file_name):
+def save_csvs(list_of_value_arrays, out_name):
 	for i in range( len(list_of_value_arrays) ):
-		outf = open(out_file_name + str(i+1) + '.csv', "w")
+		outf = open(out_name + '.' + str(i+1) + '.csv', 'w+')
 		outf.write(','.join( map(str, list_of_value_arrays[i]) ) )
 		outf.close()
+
+# kwargs is a dict of func's arguments. func is assumed to take min_pno and max_pno args,
+# which will be chosen as sub-intervals of glob_min and glob_max.
+# save_func is assumed to take as args (output of func, output_name)
+# the output of this function is a folder of name out_name with a bunch of incremental
+# saved files
+def incremental_saves(func, kwargs, inc_size, save_func, out_name, glob_min_pno = glob_min, glob_max_pno = glob_max):
+
+	pno_range = glob_max_pno - glob_min_pno
+	num_incs = pno_range / inc_size
+	remainder = pno_range % inc_size
+	if remainder != 0: num_incs += 1
+
+	bounds = [ glob_min_pno + i*inc_size for i in range(num_incs+1) ]
+	bounds[num_incs] = max(bounds[num_incs], glob_max_pno)
+
+	os.makedirs(out_name)
+
+	for i in range(num_incs):
+		# file = out_name/startpno-endpno.csv
+		fname = '%s/%d-%d' % (out_name, bounds[i], bounds[i+1])
+		kwargs['min_pno'] = bounds[i]
+		kwargs['max_pno'] = bounds[i+1]
+		out = func(**kwargs)
+		save_func(out, fname)
+
+
+
 
 
 
