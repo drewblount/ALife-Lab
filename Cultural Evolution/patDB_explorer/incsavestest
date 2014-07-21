@@ -1,3 +1,3 @@
 execfile('comber.py')
 testargs = {'top_n':10, 'up_to_n' : True}
-incremental_saves(tf_idf_comb, testargs, 100, save_csvs, 'testout')a
+incremental_saves(tf_idf_comb, testargs, 100, save_csvs, '4.15.2014.top_n_tfidf', onefile=True,verbose=True)

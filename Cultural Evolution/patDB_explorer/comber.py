@@ -22,6 +22,7 @@ from bson.code import Code
 import randPat
 import topWords
 import os
+from datetime import datetime
 
 patDB = MongoClient().patents
 patns = patDB.patns
@@ -130,13 +131,14 @@ def tf_idf_comb(top_n, up_to_n = False, min_pno=None, max_pno=None, pno_subset=N
 
 
 def save_csv(value_array, out_name):
-	outf = open(out_name + '.csv', 'w+')
+	# using the 'a' tag means that if the file already exists, it is appended to
+	outf = open(out_name + '.csv', 'a')
 	outf.write(','.join( map(str,value_array) ) )
 	outf.close()
 
 def save_csvs(list_of_value_arrays, out_name):
 	for i in range( len(list_of_value_arrays) ):
-		outf = open(out_name + '.' + str(i+1) + '.csv', 'w+')
+		outf = open(out_name + '.' + str(i+1) + '.csv', 'a')
 		outf.write(','.join( map(str, list_of_value_arrays[i]) ) )
 		outf.close()
 
@@ -144,8 +146,9 @@ def save_csvs(list_of_value_arrays, out_name):
 # which will be chosen as sub-intervals of glob_min and glob_max.
 # save_func is assumed to take as args (output of func, output_name)
 # the output of this function is a folder of name out_name with a bunch of incremental
-# saved files
-def incremental_saves(func, kwargs, inc_size, save_func, out_name, glob_min_pno = glob_min, glob_max_pno = glob_max):
+# saved files. If onefile, keeps appending to one outfile with a consistent name.
+# else, writes incremental indexed files (out_name1, out_name2, ...)
+def incremental_saves(func, kwargs, inc_size, save_func, out_name, onefile = False, glob_min_pno = glob_min, glob_max_pno = glob_max, verbose = False):
 
 	pno_range = glob_max_pno - glob_min_pno
 	num_incs = pno_range / inc_size
@@ -155,15 +158,22 @@ def incremental_saves(func, kwargs, inc_size, save_func, out_name, glob_min_pno 
 	bounds = [ glob_min_pno + i*inc_size for i in range(num_incs+1) ]
 	bounds[num_incs] = max(bounds[num_incs], glob_max_pno)
 
-	os.makedirs(out_name)
+	if not onefile:
+		os.makedirs(out_name)
+	
+	# for when onefile = true
+	fname = out_name
 
 	for i in range(num_incs):
 		# file = out_name/startpno-endpno.csv
-		fname = '%s/%d-%d' % (out_name, bounds[i], bounds[i+1])
 		kwargs['min_pno'] = bounds[i]
 		kwargs['max_pno'] = bounds[i+1]
 		out = func(**kwargs)
+		if not onefile:
+			fname = '%s/%d-%d' % (out_name, bounds[i], bounds[i+1])
 		save_func(out, fname)
+		if verbose:
+			print str(datetime.now()) + ': saved file %d / %d' % (i+1, num_incs)
 
 
 
