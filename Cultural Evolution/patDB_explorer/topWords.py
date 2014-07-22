@@ -12,6 +12,7 @@ from operator import attrgetter
 import randPat
 from time import time
 from parallelMap import parallelMap
+import csv_module as csv
 
 
 # for operations where a document's order is important,
@@ -143,9 +144,6 @@ def get_selector(texts_already_ordered = False):
 		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1, '_id': 0})
 
 
-sel = get_selector()
-
-
 # if citations = True, returns the avg shared terms among patents where
 # one cites the other. if False, returns avg shared terms among two randomly
 # chosen patents
@@ -162,6 +160,101 @@ def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = Fa
 			#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
 			totSharedTerms += shares
 	return float(totSharedTerms)/numTrials
+'''
+# returns a tuple of lists, ([all tf-idfs of words shared in p1, p2's top n],[all tf-idfs of words which appear in exactly one of p1 and p2's top n])
+# if uptoN == True, returns a list of 'n' tuples, for the top 1 terms, top 2 terms, ... , top n terms.
+def tf_idf_by_shared(pat0, pat1, n, uptoN = False):
+	words = [topNTerms(pat1, n), topNTerms(pat2, n)]
+	# speeds up "is this word in that list" lookup
+	lookup_dicts = [{}, {}]
+	# in case either patent has less than n total words
+	upper_limits = [len(pat0['sorted_text'] ), len(pat1['sorted_text'] ) ]
+	current_words
+	shared_tf_idfs = []
+	unshared_tf_idfs = []
+	for i in range(n):
+		# make sure we don't search out of bounds in either patent's sorted_text
+		idxes = [ max(i, uplim) for uplim in upper_limits ]
+		# contains each nth word
+		this_words = [ words[j][ idxes[j] ] for j in [0,1] ]
+		for j in [0,1]:
+			# update the two lookup dicts
+			lookup_dicts[j][ this_words[j]['word'] ] = this_words[j]['tf-idf']
+			
+		for j in [0,1]:
+			# if the nth word of this pat is in the lookup dict of that pat
+			if this_words[j]['word'] in lookup_dicts[1-j]:
+				# add the tf-idfs from this patn to the list of shared
+				shared_tf_idfs.append(this_words[j]['tf-idf'])
+				# the tf-idf of the same word in the other patn is in
+				# the lookup dict
+				shared_tf_idfs.append(lookup_dicts[1-j][ this_words[j]['word'] ] )
+			else:
+'''
+
+# Given two patents, returns a tuple of lists:
+# ([tf-idfs of words shared by both patn's top n],
+#  [tf-idfs of words in only one patn's top n])
+def tf_idfs_by_shared(pat0, pat1, n):
+	
+	list_of_shares = sharedTopN(pat0, pat1, n, returnWords = True)
+	dict_of_shares = {word: True for word in list_of_shares}
+	pats = (pat0, pat1)
+	shared_tf_idfs = []
+	unshared_tf_idfs = []
+
+	for i in [0,1]:
+		iwords = topNTerms(pats[i], n)
+		for word in iwords:
+			if word['word'] in dict_of_shares:
+				shared_tf_idfs.append(word['tf-idf'])
+			else:
+				unshared_tf_idfs.append(word['tf-idf'])
+
+	return (shared_tf_idfs, unshared_tf_idfs)
+
+# returns the combined output of num_pairs calls of tf_idfs_by_shared,
+# each call being on a pair of patents whose relation is described by
+# is_citepair
+def bulk_tf_idfs_by_shared(num_pairs, top_n, is_citepair=True, enforce_cite_buf_size = None):
+	sel = get_selector()
+	if enforce_cite_buf_size:
+		sel.cite_buf_size = enforce_cite_buf_size
+	shared_tf_idfs = []
+	unshared_tf_idfs = []
+
+	for i in range(num_pairs):
+		p0, p1 = sel.get_pair(is_citepair)
+		thisShare, thisUnShare = tf_idfs_by_shared(p0, p1, top_n)
+		shared_tf_idfs.append(thisShare)
+		unshared_tf_idfs.append(thisUnShare)
+
+	return (shared_tf_idfs, unshared_tf_idfs)
+
+
+# Calls the above functions repeatedly, writing the cumulative output to
+# .csv. If append=True, two output files (shared, notshared) will be
+# continuously added to, else new versions will be continually rewritten
+
+# A NOTE ON RANDOM CITATION SUBSETS: the selector's cite_buf_size (CBS for now)
+# decides how many patent-citation pairs are chosen at a time without replacement.
+# After CBS pairs are chosen, a new batch of CBS pairs are chosen. There
+# might be overlap ('replacement' in random-selection-from-a-set lingo)
+# between the pairs chosen in separate batches, but never within one batch.
+
+def write_bulk_tf_idfs_by_shared(tot_pairs, pairs_per_batch, top_n, is_citepair=True, out_name, append=True):
+	
+	num_batches = tot_pairs/pairs_per_batch
+	remainder = tot_pairs % pairs_per_batch
+
+	for i in range(num_batches)
+		this_out = bulk_tf_idfs_by_shared(pairs_per_batch, top_n, is_citepair, enforce_cite_buf_size = pairs_per_batch)
+		outn = out_name
+		if not append: outn += '.%d' % i
+		csv.save_csv(this_out[0], 'shared_'+outn)
+		csv.save_csv(this_out[1], 'unshared_'+outn)
+
+
 
 def timeFunc(func, input):
 	t0 = time()
