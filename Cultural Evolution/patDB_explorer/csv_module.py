@@ -12,13 +12,13 @@ glob_min = metadata.find_one({'_id':'min_pno'})['val']
 
 def save_csv(value_array, out_name):
 	# using the 'a' tag means that if the file already exists, it is appended to
-	outf = open(out_name + '.csv', 'a')
+	outf = open(out_name + '.csv', 'a+')
 	outf.write(','.join( map(str,value_array) ) )
 	outf.close()
 
 def save_csvs(list_of_value_arrays, out_name):
 	for i in range( len(list_of_value_arrays) ):
-		outf = open(out_name + '.' + str(i+1) + '.csv', 'a')
+		outf = open(out_name + '.' + str(i+1) + '.csv', 'a+')
 		outf.write(','.join( map(str, list_of_value_arrays[i]) ) )
 		outf.close()
 
