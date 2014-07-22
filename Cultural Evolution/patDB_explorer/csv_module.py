@@ -1,4 +1,14 @@
 import csv
+from pymongo import MongoClient
+
+patDB = MongoClient().patents
+patns = patDB.patns
+just_cites = patDB.just_cites
+metadata = patDB.pat_metadata
+
+glob_max = metadata.find_one({'_id':'max_pno'})['val']
+glob_min = metadata.find_one({'_id':'min_pno'})['val']
+
 
 def save_csv(value_array, out_name):
 	# using the 'a' tag means that if the file already exists, it is appended to

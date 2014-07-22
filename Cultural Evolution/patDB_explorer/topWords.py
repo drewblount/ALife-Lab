@@ -242,12 +242,12 @@ def bulk_tf_idfs_by_shared(num_pairs, top_n, is_citepair=True, enforce_cite_buf_
 # might be overlap ('replacement' in random-selection-from-a-set lingo)
 # between the pairs chosen in separate batches, but never within one batch.
 
-def write_bulk_tf_idfs_by_shared(tot_pairs, pairs_per_batch, top_n, is_citepair=True, out_name, append=True):
+def write_bulk_tf_idfs_by_shared(tot_pairs, pairs_per_batch, top_n, out_name, is_citepair=True, append=True):
 	
 	num_batches = tot_pairs/pairs_per_batch
 	remainder = tot_pairs % pairs_per_batch
 
-	for i in range(num_batches)
+	for i in range(num_batches):
 		this_out = bulk_tf_idfs_by_shared(pairs_per_batch, top_n, is_citepair, enforce_cite_buf_size = pairs_per_batch)
 		outn = out_name
 		if not append: outn += '.%d' % i
