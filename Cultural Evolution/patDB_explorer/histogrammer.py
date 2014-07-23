@@ -33,3 +33,8 @@ def mean(vals):
 	for val in vals:
 		sum += val
 	return sum/len(vals)
+
+
+# simply a helper function for finding some of the data I've saved
+def data_top(n):
+	return 'data/fulldb.firstgo.top_n_tfidf/fulldb.firstgo.top_n_tfidf.%d.csv' % n
