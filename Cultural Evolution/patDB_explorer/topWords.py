@@ -11,8 +11,11 @@ from pymongo  import MongoClient
 from operator import attrgetter
 import randPat
 from time import time
+from datetime import datetime
 from parallelMap import parallelMap
 import csv_module as csv
+import multiprocessing
+import os
 
 
 # for operations where a document's order is important,
@@ -226,8 +229,8 @@ def bulk_tf_idfs_by_shared(num_pairs, top_n, is_citepair=True, enforce_cite_buf_
 	for i in range(num_pairs):
 		p0, p1 = sel.get_pair(is_citepair)
 		thisShare, thisUnShare = tf_idfs_by_shared(p0, p1, top_n)
-		shared_tf_idfs.append(thisShare)
-		unshared_tf_idfs.append(thisUnShare)
+		shared_tf_idfs += thisShare
+		unshared_tf_idfs += thisUnShare
 
 	return (shared_tf_idfs, unshared_tf_idfs)
 
@@ -242,7 +245,7 @@ def bulk_tf_idfs_by_shared(num_pairs, top_n, is_citepair=True, enforce_cite_buf_
 # might be overlap ('replacement' in random-selection-from-a-set lingo)
 # between the pairs chosen in separate batches, but never within one batch.
 
-def write_bulk_tf_idfs_by_shared(tot_pairs, pairs_per_batch, top_n, out_name, is_citepair=True, append=True):
+def write_bulk_tf_idfs_by_shared(tot_pairs, pairs_per_batch, top_n, out_name, is_citepair=True, append=True, verbose = False):
 	
 	num_batches = tot_pairs/pairs_per_batch
 	remainder = tot_pairs % pairs_per_batch
@@ -253,6 +256,27 @@ def write_bulk_tf_idfs_by_shared(tot_pairs, pairs_per_batch, top_n, out_name, is
 		if not append: outn += '.%d' % i
 		csv.save_csv(this_out[0], 'shared_'+outn)
 		csv.save_csv(this_out[1], 'unshared_'+outn)
+		if verbose: print str(datetime.now()) + ': saved batch %d / %d' % (i+1, num_batches)
+
+# literally just executes p instances of the above func, where p = num processors
+def write_parallel_bulk_tf_idfs_by_shared(tot_pairs_per_proc, pairs_per_batch, top_n, out_name, is_citepair=True, append=True, verbose = False):
+
+	if not os.path.exists(out_name):
+		os.makedirs(out_name)
+
+	workerProcesses = []
+	for i in range(0, multiprocessing.cpu_count()):
+		p = multiprocessing.Process(target = write_bulk_tf_idfs_by_shared,
+									args = (tot_pairs_per_proc, pairs_per_batch,
+											top_n, out_name+'/proc%d'%i,
+											is_citepair, append, verbose)
+									)
+		p.daemon = True
+		p.start()
+		workerProcesses.append(p)
+	
+	for p in workerProcesses:
+		p.join()
 
 
 
