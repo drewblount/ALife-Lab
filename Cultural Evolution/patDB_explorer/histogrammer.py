@@ -35,6 +35,29 @@ def mean(vals):
 	return sum/len(vals)
 
 
+## SOME SCRIPTS ####
+
 # simply a helper function for finding some of the data I've saved
 def data_top(n):
 	return 'data/fulldb.firstgo.top_n_tfidf/fulldb.firstgo.top_n_tfidf.%d.csv' % n
+
+def name_top(n, opt=None):
+	ret = 'top_%d_terms_all_pats' % n
+
+	if opt:
+		ret += opt
+
+def title_top(n):
+	# so the title doesn't have a weird plural when n = 1
+	instring = ''
+	if n == 1:
+		instring = ' '
+	else:
+		instring = '-%d-' % n
+	'histogram of all patents\' top%sterms\' tf-idfs' % instring
+
+
+def plot_top(n, range=None):
+	histogram(data_top(n), name_top(n), title_top(n), checkVals = True)
+
+
