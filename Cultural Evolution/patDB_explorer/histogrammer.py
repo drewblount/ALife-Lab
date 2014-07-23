@@ -6,9 +6,11 @@ execfile('comber.py')
 
 # A not-really-necessary wrapper for pyplot.hist
 # includes just a few of the args from pyplot.hist
+# if saveName is entered, it is presumed to be a string choosing the
+# output imagename. Else, the histogram is displayed in a new window.
 # Checkvals is for some data-cleaning that's only necessary on
 # data from my early-version bulk .csv writer
-def histogram(vals, title=None, xlabel=None, drawMean=True, binsCode=100, rangeCode = None, logCode=False, colorCode='r',checkVals=False, normCode=False):
+def histogram(vals, saveName=None, title=None, xlabel=None, drawMean=True, binsCode=100, rangeCode = None, logCode=False, colorCode='r',checkVals=False, normCode=False):
 	
 	# If vals is a string, it's assumed to be the name of a csv file that
 	# can be opened
@@ -20,7 +22,11 @@ def histogram(vals, title=None, xlabel=None, drawMean=True, binsCode=100, rangeC
 	if xlabel: plt.xlabel(xlabel)
 	if drawMean:
 		plt.axvline(mean(vals), color='k', linestyle='dashed', linewidth=2)
-	plt.show()
+
+	if saveName:
+		plt.savefig(saveName)
+	else:
+		plt.show()
 
 def mean(vals):
 	sum = 0.0
