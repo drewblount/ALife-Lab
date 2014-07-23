@@ -13,7 +13,8 @@ glob_min = metadata.find_one({'_id':'min_pno'})['val']
 def save_csv(value_array, out_name):
 	# using the 'a' tag means that if the file already exists, it is appended to
 	outf = open(out_name + '.csv', 'a')
-	outf.write(','.join( map(str,value_array) ) )
+	# the comma at the end is important for bulk writes
+	outf.write(','.join( map(str,value_array) )+',' )
 	outf.close()
 
 def save_csvs(list_of_value_arrays, out_name):
@@ -21,6 +22,7 @@ def save_csvs(list_of_value_arrays, out_name):
 		outf = open(out_name + '.' + str(i+1) + '.csv', 'a')
 		outf.write(','.join( map(str, list_of_value_arrays[i]) ) )
 		outf.close()
+
 
 # kwargs is a dict of func's arguments. func is assumed to take min_pno and max_pno args,
 # which will be chosen as sub-intervals of glob_min and glob_max.
@@ -55,14 +57,40 @@ def incremental_saves(func, kwargs, inc_size, save_func, out_name, onefile = Fal
 		if verbose:
 			print str(datetime.now()) + ': saved file %d / %d' % (i+1, num_incs)
 
-def open_csv(fname):
+# With my initial bulk-write protocol, successive bulk-writes
+# weren't comma-separated, so at the end of each write/beginning of next,
+# there is a value which looks like '0.123450.12345', which can't
+# be cast back into a float. This replaces those troublesome vals with
+# a default value, which is bad data-practice but shouldn't make a big dif
+# over a million data points, and allows us to use the large-but-slightly-broken
+# files already made
+def tryFloat(val, default_float=0.12):
+	try: return float(val)
+	except ValueError: return(default_float)
+
+# simple helper for the function below
+def mapTyp(func):
+	def mapper(arg):
+		return map(func, arg)
+	return mapper
+
+def open_csv(fname, arrTyp=float, fixVals=False):
 	out = []
 	with open(fname, 'rb') as inF:
 		reader = csv.reader(inF)
 		for row in reader:
 			out.append(row)
+	# out is currently an array of arrays of strings
+	if fixVals: arrTyp = tryFloat
+	out = map(mapTyp(arrTyp), out)
+	# now out is an array of arrays of arrTyp
+	if len(out) == 1: out = out[0]
 
-	if len(out) == 1:	return out[0]
-	else: return out
+	return out
+
+
+
+
+
 
 

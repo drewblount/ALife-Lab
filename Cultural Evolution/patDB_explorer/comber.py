@@ -94,7 +94,7 @@ def top_upto_n_map(n):
 # lim limits the number of documents looked at
 def tf_idf_comb(top_n, up_to_n = False, min_pno=None, max_pno=None, pno_subset=None, lim=None):
 	
-	query_arg = {'sorted_text': {'$exists': True}}
+	query_arg = {'sorted_text': {'$exists': True} }
 
 	# Adds pno restrictions to the query_arg if those arguments were
 	# included in the function call
