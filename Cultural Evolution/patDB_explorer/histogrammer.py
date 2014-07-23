@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import csv_module
 
 execfile('comber.py')
-all_tfidfs = tf_idf_comb(1000)
+# all_tfidfs = tf_idf_comb(1000)
 
 # A not-really-necessary wrapper for pyplot.hist
 # includes just a few of the args from pyplot.hist
