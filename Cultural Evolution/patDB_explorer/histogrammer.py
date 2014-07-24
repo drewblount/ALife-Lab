@@ -43,9 +43,9 @@ def data_top(n):
 
 def name_top(n, opt=None):
 	ret = 'top_%d_terms_all_pats' % n
-
 	if opt:
 		ret += opt
+	return ret
 
 def title_top(n):
 	# so the title doesn't have a weird plural when n = 1
@@ -54,10 +54,25 @@ def title_top(n):
 		instring = ' '
 	else:
 		instring = '-%d-' % n
-	'histogram of all patents\' top%sterms\' tf-idfs' % instring
+	return 'histogram of all patents\' top%sterms\' tf-idfs' % instring
 
 
 def plot_top(n, range=None):
-	histogram(data_top(n), name_top(n), title_top(n), checkVals = True)
+	rangeStr =''
+	if range:
+		rangeStr = 'ranged'
+	histogram(data_top(n), name_top(n, rangeStr), title_top(n), rangeCode = range,checkVals = True)
+
+# This is a very specific script for a particular data set and location
+def plot_all_jul23(verbose=False):
+	for i in range(1,11):
+		plot_top(i)
+		if verbose:
+			print 'plotted top 1, unranged' % i
+		plot_top(i, range=(0.0,2.0))
+		if verbose:
+			print 'plotted top %d, ranged.' % i
+
+
 
 
