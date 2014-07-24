@@ -68,7 +68,7 @@ def plot_all_jul23(verbose=False):
 	for i in range(1,11):
 		plot_top(i)
 		if verbose:
-			print 'plotted top 1, unranged' % i
+			print 'plotted top %d, unranged' % i
 		plot_top(i, range=(0.0,2.0))
 		if verbose:
 			print 'plotted top %d, ranged.' % i
