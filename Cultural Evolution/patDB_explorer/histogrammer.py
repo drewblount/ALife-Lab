@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import csv_module
+from numpy import mean, median
 
 execfile('comber.py')
 # all_tfidfs = tf_idf_comb(1000)
@@ -10,7 +11,7 @@ execfile('comber.py')
 # output imagename. Else, the histogram is displayed in a new window.
 # Checkvals is for some data-cleaning that's only necessary on
 # data from my early-version bulk .csv writer
-def histogram(vals, saveName=None, title=None, xlabel=None, drawMean=True, binsCode=100, rangeCode = None, logCode=False, colorCode='r',checkVals=False, normCode=False):
+def histogram(vals, saveName=None, title=None, xlabel=None, drawMean=True, drawMedian=False, binsCode=100, rangeCode = None, logCode=False, colorCode='r',checkVals=False, normCode=False):
 	
 	# If vals is a string, it's assumed to be the name of a csv file that
 	# can be opened
@@ -22,17 +23,13 @@ def histogram(vals, saveName=None, title=None, xlabel=None, drawMean=True, binsC
 	if xlabel: plt.xlabel(xlabel)
 	if drawMean:
 		plt.axvline(mean(vals), color='k', linestyle='dashed', linewidth=2)
+	if drawMedian:
+		plt.axvline(median(vals), color='k', linestyle='-.', linewidth=2)
 
 	if saveName:
 		plt.savefig(saveName)
 	else:
 		plt.show()
-
-def mean(vals):
-	sum = 0.0
-	for val in vals:
-		sum += val
-	return sum/len(vals)
 
 
 ## SOME SCRIPTS ####
@@ -57,19 +54,19 @@ def title_top(n):
 	return 'histogram of all patents\' top%sterms\' tf-idfs' % instring
 
 
-def plot_top(n, range=None):
+def plot_top(n, range=None, drawMed=False):
 	rangeStr =''
 	if range:
 		rangeStr = 'ranged'
-	histogram(data_top(n), name_top(n, rangeStr), title_top(n), rangeCode = range,checkVals = True)
+	histogram(data_top(n), name_top(n, rangeStr), title_top(n), rangeCode = range,checkVals = True, drawMedian=drawMed)
 
 # This is a very specific script for a particular data set and location
 def plot_all_jul23(verbose=False):
 	for i in range(1,11):
-		plot_top(i)
+		plot_top(i, drawMed=True)
 		if verbose:
 			print 'plotted top %d, unranged' % i
-		plot_top(i, range=(0.0,2.0))
+		plot_top(i, range=(0.0,2.0), drawMed=True)
 		if verbose:
 			print 'plotted top %d, ranged.' % i
 
