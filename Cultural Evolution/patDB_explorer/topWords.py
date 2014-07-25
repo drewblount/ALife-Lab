@@ -174,7 +174,7 @@ def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = Fa
 def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=True, fname_suffix=None):
 	
 	# makes an output folder
-	fname = '%d_trials_shared_term_sweep' % numTrial
+	fname = '%sh_term_sweep_%d_trials_upto_%d' % (numTrials, max_n)
 	if fname_suffix:
 		fname += ('_'+fname_suffix)
 	
