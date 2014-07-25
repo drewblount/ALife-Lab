@@ -13,7 +13,7 @@ import randPat
 from time import time
 from datetime import datetime
 from parallelMap import parallelMap
-import csv_module as csv
+import csv_module
 import multiprocessing
 import os
 
@@ -163,6 +163,50 @@ def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = Fa
 			#print '%d shared terms between patns %d and %d' % (shares, pat1['pno'], pat2['pno'])
 			totSharedTerms += shares
 	return float(totSharedTerms)/numTrials
+
+
+# simply a script for calling the above func on a parameter sweep of n and 'citations' and
+# saving the output in .csv.
+# There's obviously a much faster way of doing this, but there's free compute time right now
+# and this code is easy to write (i.e. collect shared terms considering top1..n for each pair,
+# not collecting only the shared terms considering top i incrementally
+# dname suffix goes on the end of the folder name where the output is saved
+def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=True, dname_suffix=None):
+	
+	# this is the format of each row of the .csv
+	header = ['top n', 'rand pair avg shared terms', 'rand pair ratio ast/n', 'cite pair ast', 'cite pair ast/n']
+
+
+	# makes an output folder
+	dirname = '%d_trials_shared_term_sweep' % numTrials
+	if dname_suffix:
+		dirname += ('_'+dname_suffix)
+	
+	if not os.path.exists(dirname):
+		os.makedirs(dirname)
+
+	for i in range(1, max_n+1):
+		# cite_stat=citation status of the pairs being examined (True means cite pairs, False means random pairs)
+		
+		# I figure I'll silence 'verbose' down the line regardless
+		rand_sh, cite_sh = (avg_shared_terms(numTrials, i, citations=CITE_STAT, texts_already_ordered=texts_already_ordered, verbose=False) for CITE_STAT in [False, True])
+
+		rand_norm, cite_norm = rand_sh/i, cite_sh/i
+		out_arr = [i, rand_sh, rand_norm, cite_sh, cite_norm]
+
+		# This could be better formatted
+		if verbose:
+			if i % 5 == 1:
+				print '[top n, rand pair avg shared terms, rand pair ratio ast/n, cite pair ast, cite pair ast/n]'
+			print '%s: %s' % (str(datetime.now()), str(out_arr))
+		
+		# saving: successive values of i will be new lines in the cite_stat .csv file
+		fname = dirname + '/%s' % ('cite' if cite_stat else 'rand')
+		csv_module.save_csv(out_arr, fname, trail_endl=True)
+
+
+
+
 '''
 # returns a tuple of lists, ([all tf-idfs of words shared in p1, p2's top n],[all tf-idfs of words which appear in exactly one of p1 and p2's top n])
 # if uptoN == True, returns a list of 'n' tuples, for the top 1 terms, top 2 terms, ... , top n terms.
@@ -254,10 +298,12 @@ def write_bulk_tf_idfs_by_shared(tot_pairs, pairs_per_batch, top_n, out_name, is
 		this_out = bulk_tf_idfs_by_shared(pairs_per_batch, top_n, is_citepair, enforce_cite_buf_size = pairs_per_batch)
 		outn = out_name
 		if not append: outn += '.%d' % i
-		csv.save_csv(this_out[0], 'shared_'+outn)
-		csv.save_csv(this_out[1], 'unshared_'+outn)
+		csv_module.save_csv(this_out[0], 'shared_'+outn)
+		csv_module.save_csv(this_out[1], 'unshared_'+outn)
 		if verbose: print str(datetime.now()) + ': saved batch %d / %d' % (i+1, num_batches)
 
+# BROKEN at least wrt randomization ( I think each processor gets the same random
+# seed, somewhere in randPat)
 # literally just executes p instances of the above func, where p = num processors
 def write_parallel_bulk_tf_idfs_by_shared(tot_pairs_per_proc, pairs_per_batch, top_n, out_name, is_citepair=True, append=True, verbose = False):
 
@@ -311,7 +357,7 @@ def avg_tf_idf_shared_terms(numTrials, n, citations = True, texts_already_ordere
 	avg_ctd_tf_idf = tot_ctd_tf_idf / num_terms
 
 	if verbose:
-		print 'From %d cite pairs, %d shared terms were found in the top %d terms between parent and child. The average tf_idf of these shared terms in the cited patents (parents) was %f. The average tf_idf of these shared terms in the source patents (children) was %f.' %(num_terms, n, avg_ctd_tf_idf, avg_src_tf_idf)
+		print str(datetime.now())+': From %d cite pairs, %d shared terms were found in the top %d terms between parent and child. The average tf_idf of these shared terms in the cited patents (parents) was %f. The average tf_idf of these shared terms in the source patents (children) was %f.' %(num_terms, n, avg_ctd_tf_idf, avg_src_tf_idf)
 
 	print 'sh_terms'
 	return (avg_src_tf_idf, avg_ctd_tf_idf)
