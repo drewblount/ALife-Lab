@@ -171,19 +171,17 @@ def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = Fa
 # and this code is easy to write (i.e. collect shared terms considering top1..n for each pair,
 # not collecting only the shared terms considering top i incrementally
 # dname suffix goes on the end of the folder name where the output is saved
-def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=True, dname_suffix=None):
+def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=True, fname_suffix=None):
+	
+	# makes an output folder
+	fname = '%d_trials_shared_term_sweep' % numTrial
+	if fname_suffix:
+		fname += ('_'+fname_suffix)
 	
 	# this is the format of each row of the .csv
 	header = ['top n', 'rand pair avg shared terms', 'rand pair ratio ast/n', 'cite pair ast', 'cite pair ast/n']
-
-
-	# makes an output folder
-	dirname = '%d_trials_shared_term_sweep' % numTrials
-	if dname_suffix:
-		dirname += ('_'+dname_suffix)
-	
-	if not os.path.exists(dirname):
-		os.makedirs(dirname)
+ 
+	csv_module.save(header, fname, trail_endl=True)
 
 	for i in range(1, max_n+1):
 		# cite_stat=citation status of the pairs being examined (True means cite pairs, False means random pairs)
@@ -201,7 +199,6 @@ def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=Tru
 			print '%s: %s' % (str(datetime.now()), str(out_arr))
 		
 		# saving: successive values of i will be new lines in the cite_stat .csv file
-		fname = dirname + '/%s' % ('cite' if cite_stat else 'rand')
 		csv_module.save_csv(out_arr, fname, trail_endl=True)
 
 
