@@ -10,11 +10,13 @@ glob_max = metadata.find_one({'_id':'max_pno'})['val']
 glob_min = metadata.find_one({'_id':'min_pno'})['val']
 
 
-def save_csv(value_array, out_name):
+def save_csv(value_array, out_name, trail_endl=False):
 	# using the 'a' tag means that if the file already exists, it is appended to
 	outf = open(out_name + '.csv', 'a')
 	# the comma at the end is important for bulk writes
 	outf.write(','.join( map(str,value_array) )+',' )
+	if trail_endl:
+		outf.write('\n')
 	outf.close()
 
 def save_csvs(list_of_value_arrays, out_name):
