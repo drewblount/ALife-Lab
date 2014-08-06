@@ -178,18 +178,27 @@ def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=Tru
 	if fname_suffix:
 		fname += ('_'+fname_suffix)
 	
+	if verbose: print 'fname is ' + fname
+	
 	# this is the format of each row of the .csv
 	header = ['top n', 'rand pair avg shared terms', 'rand pair ratio ast/n', 'cite pair ast', 'cite pair ast/n']
  
 	csv_module.save_csv(header, fname, trail_endl=True)
 
+	if verbose: print 'saved header as ' + header
+
 	for i in range(1, max_n+1):
 		# cite_stat=citation status of the pairs being examined (True means cite pairs, False means random pairs)
 		
+		if verbose: print 'gathering data for top n = &d' % i
+		
 		# I figure I'll silence 'verbose' down the line regardless
 		rand_sh, cite_sh = (avg_shared_terms(numTrials, i, citations=CITE_STAT, texts_already_ordered=texts_already_ordered, verbose=False) for CITE_STAT in [False, True])
+		
+		if verbose: print 'rand_sh = %f; cite_sh = %f' % (rand_sh, cite_sh)
 
 		rand_norm, cite_norm = rand_sh/i, cite_sh/i
+		if verbose: print 'rand_nm = %f; cite_nm = %f' % (rand_norm, cite_norm)
 		out_arr = [i, rand_sh, rand_norm, cite_sh, cite_norm]
 
 		# This could be better formatted
