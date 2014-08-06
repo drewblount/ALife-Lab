@@ -192,7 +192,7 @@ def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=Tru
 	for i in range(1, max_n+1):
 		# cite_stat=citation status of the pairs being examined (True means cite pairs, False means random pairs)
 		
-		if verbose: print 'gathering data for top n = &d' % i
+		if verbose: print 'gathering data for top n = %d' % i
 		
 		# I figure I'll silence 'verbose' down the line regardless
 		rand_sh, cite_sh = (avg_shared_terms(numTrials, i, citations=CITE_STAT, texts_already_ordered=texts_already_ordered, verbose=False) for CITE_STAT in [False, True])
