@@ -91,6 +91,67 @@ def orderAllTexts(coll):
 				updateFreq = 5000,
 				bSize = 5000)
 
+# returns a vector of (s_1,...,s_n) where s_i is the number of terms
+# shared by the top n words between the two pats
+def shared_n_vector(p1, p2, n):
+	words1, words2 = topNTerms(pat1, n, patCol_to_update), topNTerms(pat2, n, patCol_to_update)
+		
+	shCount = 0
+	out_vect = []
+	# the max n for which both pats have an nth word we care abt
+	word_lim = min(n, len(words1), len(words2))
+	# dicts for lookup
+	w1s, w2s = {}, {}
+
+	for i in range(word_lim):
+		# each ith word
+		w1 = words1[i]['word']
+		w2 = words2[i]['word']
+
+		# add words to lookup dicts
+		w1s[w1] = True
+		w2s[w2] = True
+
+		# checks for overlap
+		if w1 in w2s: shCount += 1
+		if w2 in w1s: shCount += 1
+
+		#updates out_vect
+		out_vect += shCount
+
+	# in case len(words2) < n, len(words1)
+	for i in range(word_lim, min(len(words1), n) ):
+		w1 = words1[i]['word']
+		if w1 in w2s: shCount += 1
+		#updates out_vect
+		out_vect += shCount
+	# like above, switching 1 and 2
+	for i in range(word_lim, min(len(words2), n) ):
+		w2 = words2[i]['word']
+		if w2 in w1s: shCount += 1
+		#updates out_vect
+		out_vect += shCount
+
+	# now accounts for when both words1 and words2 are shorter than n
+	# in which case the final (n - max(length of each words)) spots of
+	# outvect must be filled (e.g. if two patents each have 5 words, then
+	# the number of terms they share among their top 8 words is the
+	# same as among their top 5.)
+	for i in range( len(out_vect), n ):
+		if (len(out_vect) != 0):
+			out_vect += out_vect[-1]
+		else:
+			out_vect += 0
+
+	return out_vect
+
+def add_sh_vector(v1, v2):
+	out_v = [v1[i] + v2[i] for i in range(len(v1))]
+	return out_v
+
+# calls shared_n_vector m different times, summing the result, for shared
+# or unshared patents
+#def shared_n_vectors(n, m, cite_pairs=True):
 
 
 # Returns the number of words shared by the top n words in each patent
@@ -171,7 +232,7 @@ def avg_shared_terms(numTrials, n, citations = False, texts_already_ordered = Fa
 # and this code is easy to write (i.e. collect shared terms considering top1..n for each pair,
 # not collecting only the shared terms considering top i incrementally
 # dname suffix goes on the end of the folder name where the output is saved
-def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=True, fname_suffix=None):
+def sweep_shared_terms(numTrials, max_n, min_n=1, texts_already_ordered=True, verbose=True, fname_suffix=None):
 	
 	# makes an output folder
 	fname = 'sh_term_sweep_%d_trials_upto_%d' % (numTrials, max_n)
@@ -181,7 +242,7 @@ def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=Tru
 	if verbose: print 'fname is ' + fname
 	
 	# this is the format of each row of the .csv
-	header = ['top n', 'rand pair avg shared terms', 'rand pair ratio ast/n', 'cite pair ast', 'cite pair ast/n']
+	header = ['top n', 'sst(n,rand)', 'sst(n,rand)/n', 'sst(n,cite)', 'sst(n,cite)/n']
  
 	csv_module.save_csv(header, fname, trail_endl=True)
 
@@ -189,7 +250,7 @@ def sweep_shared_terms(numTrials, max_n, texts_already_ordered=True, verbose=Tru
 		strHead = ', '.join(header)
 		print 'saved header as ' + strHead
 
-	for i in range(1, max_n+1):
+	for i in range(min_n, max_n+1):
 		# cite_stat=citation status of the pairs being examined (True means cite pairs, False means random pairs)
 		
 		if verbose: print 'gathering data for top n = %d' % i
