@@ -117,20 +117,20 @@ def shared_n_vector(p1, p2, n):
 		if w2 in w1s: shCount += 1
 
 		#updates out_vect
-		out_vect += shCount
+		out_vect.append(shCount)
 
 	# in case len(words2) < n, len(words1)
 	for i in range(word_lim, min(len(words1), n) ):
 		w1 = words1[i]['word']
 		if w1 in w2s: shCount += 1
 		#updates out_vect
-		out_vect += shCount
+		out_vect.append(shCount)
 	# like above, switching 1 and 2
 	for i in range(word_lim, min(len(words2), n) ):
 		w2 = words2[i]['word']
 		if w2 in w1s: shCount += 1
 		#updates out_vect
-		out_vect += shCount
+		out_vect.append(shCount)
 
 	# now accounts for when both words1 and words2 are shorter than n
 	# in which case the final (n - max(length of each words)) spots of
