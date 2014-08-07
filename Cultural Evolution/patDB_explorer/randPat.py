@@ -120,7 +120,7 @@ class Selector(object):
 		if enforce_func(p1) and enforce_func(p2): return (p1,p2)
 		# Try again if one of the patents fails the required test
 		else:
-			print 'retry'
+			if self.verbose: print 'retry'
 			return self.get_rand_cite(enforce_func)
 
 	def rand_pnos(self, n, sort = False):
