@@ -14,7 +14,7 @@ for i in range(100):
 
 	csv_module.save_csv(outC, 'cited_shared_vects_%d_trials_%_perrow' % (maxruns,dumpfreq)
 
-	outC = shared_n_vectors(n, maxruns, cite_pairs=False, texts_already_ordered=False)
+	outR = shared_n_vectors(n, maxruns, cite_pairs=False, texts_already_ordered=False)
 	
 	csv_module.save_csv(outC, 'rand_shared_vects_%d_trials_%_perrow' % (maxruns,dumpfreq)
 
