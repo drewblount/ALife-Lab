@@ -165,7 +165,7 @@ def shared_n_vectors(n, m, cite_pairs=True, texts_already_ordered=False):
 	for i in range(1,m):
 		pat1, pat2 = selector.get_pair(cite_pairs)
 		# add output to running total (a reduce function)
-		out = add_sh_vecto(out, shared_n_vector(pat1, pat2, n))
+		out = add_sh_vector(out, shared_n_vector(pat1, pat2, n))
 	return out
 
 # Returns the number of words shared by the top n words in each patent
