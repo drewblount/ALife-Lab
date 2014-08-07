@@ -94,7 +94,7 @@ def orderAllTexts(coll):
 # returns a vector of (s_1,...,s_n) where s_i is the number of terms
 # shared by the top n words between the two pats
 def shared_n_vector(p1, p2, n):
-	words1, words2 = topNTerms(p1, n, patCol_to_update), topNTerms(p2, n, patCol_to_update)
+	words1, words2 = topNTerms(p1, n), topNTerms(p2, n)
 		
 	shCount = 0
 	out_vect = []
