@@ -139,9 +139,9 @@ def shared_n_vector(p1, p2, n):
 	# same as among their top 5.)
 	for i in range( len(out_vect), n ):
 		if (len(out_vect) != 0):
-			out_vect += out_vect[-1]
+			out_vect.append(out_vect[-1])
 		else:
-			out_vect += 0
+			out_vect.append(0)
 
 	return out_vect
 
