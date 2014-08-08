@@ -478,7 +478,7 @@ def shared_term_ranks(num_sh_terms, top_n, citations = True, texts_already_order
 		tts1, tts2 = topNTerms(p1, top_n, patCol_to_update), topNTerms(p2, top_n, patCol_to_update)
 
 		# it's faster to see if a word is in a dict than an array
-		tts1_lookup = { tts1[i]['word']: i for i in range(top_n) }
+		tts1_lookup = { tts1[i]['word']: i for i in range(len(tts1)) }
 
 		for i in range(len(tts2)):
 			if tts2[i]['word'] in tts1_lookup:
