@@ -485,8 +485,8 @@ def shared_term_ranks(num_sh_terms, top_n, citations = True, texts_already_order
 				
 				pno1 = p1['pno']
 				pno2 = p2['pno']
-				rank1 = tts1_lookup[tts2[i]['word']]
-				rank2 = i
+				rank1 = tts1_lookup[tts2[i]['word']] + 1
+				rank2 = i + 1
 				
 				write_out([pno1, pno2, rank1, rank2], outf)
 				
