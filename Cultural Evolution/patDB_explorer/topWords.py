@@ -446,7 +446,56 @@ def avg_tf_idf_shared_terms(numTrials, n, citations = True, texts_already_ordere
 	return (avg_src_tf_idf, avg_ctd_tf_idf)
 
 
+# saves a .csv of
+# pno1 pno2 rank1 rank2
+# for each term which is shared between a pair of patents
+# if citations = True, pno1 signifies the parent patent.
+# rankI signifies the rank (1 - n) of the term in that patent's
+# top-n tf-idf terms.
+def shared_term_ranks(num_sh_terms, top_n, citations = True, texts_already_ordered = False, verbose = False, fname_suffix='', patCol_to_update=patns, write_freq = 1000):
 
+	selector = get_selector(texts_already_ordered)
+	sh_term_count = 0
+	
+	fname = 'sh_term_ranks_%s_topn=%d_num=%d%s' % (
+												'cite-pairs' if citations else 'rand-pairs',
+												top_n,
+												num_sh_terms,
+												fname_suffix
+												)
+	outf = open(fname + '.csv', 'a')
+	def write_out(array, out):
+		out.write(','.join( map(str, array) ) + '\n')
+	
+	# saves the header
+	write_out(['pno1','pno2','rank1','rank2'], outf)
+
+
+	while (sh_term_count < num_sh_terms):
+		# if citations, p1 is the parent, p2 the child
+		p1, p2 = selector.get_pair(citations)
+		# each patent's top terms
+		tts1, tts2 = topNTerms(p1, top_n, patCol_to_update), topNTerms(p2, top_n, patCol_to_update)
+
+		# it's faster to see if a word is in a dict than an array
+		tts1_lookup = { tts1[i]['word']: i for i in range(top_n) }
+
+		for i in range(len(tts2)):
+			if tts2[i]['word'] in tts1_lookup:
+				
+				pno1 = p1['pno']
+				pno2 = p2['pno']
+				rank1 = tts1_lookup[tts2[i]['word']]
+				rank2 = i
+				
+				write_out([pno1, pno2, rank1, rank2], outf)
+				
+				sh_term_count += 1
+				if sh_term_count % write_freq == 0:
+				# save the output by closing, reopening file
+					outf.close()
+					outf = open(fname + '.csv', 'a')
+	outf.close()
 
 
 

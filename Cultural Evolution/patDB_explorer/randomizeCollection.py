@@ -99,7 +99,11 @@ def n_docs_near(n, coll, num, query = {}, proj = {}, verbose = False):
 			return ret
 
 def n_rand_docs(n, coll, randseed = time(), proj = {}, verbose = True):
-	random.seed(randseed)
+	# weird, with the below line the code behaves as though it always
+	# gets the same seed, even though randseed = time()
+	#random.seed(randseed)
+	
+	random.seed(time())
 	return n_docs_near(n, coll, random.random(), proj)
 
 

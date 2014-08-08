@@ -10,6 +10,7 @@ from pymongo  import MongoClient, ASCENDING, DESCENDING
 from bson.code import Code
 import random
 from randomizeCollection import rand_doc, n_rand_docs
+from time import time
 
 
 patDB = MongoClient().patents
@@ -42,7 +43,7 @@ def has_tf_idfs(pat):
 # stored by the selector at a time (to reduce calls to the cite db)
 class Selector(object):
 	
-	def __init__(self, patCol = patns, projection = {'_id':0}, rand_seed = None, db = patDB, verbose = False, buf_size = 10000):
+	def __init__(self, patCol = patns, projection = {'_id':0}, rand_seed = time(), db = patDB, verbose = False, buf_size = 10000):
 		
 		if not db.pat_metadata.find_one({'_id': 'max_pno'}):
 			import maxmin
@@ -114,6 +115,8 @@ class Selector(object):
 		if not self.rand_cites.alive:
 			self.stock_n_cite_pairs(self.cite_buf_size)
 
+		# I don't get it--I'm getting an empty cursor error on the
+		# following line, but the above line should prevent that
 		citation = self.rand_cites.next()
 		p1, p2 = self.just_cite_to_patns(citation)
 		
