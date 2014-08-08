@@ -449,7 +449,7 @@ def avg_tf_idf_shared_terms(numTrials, n, citations = True, texts_already_ordere
 # saves a .csv of
 # pno1 pno2 rank1 rank2
 # for each term which is shared between a pair of patents
-# if citations = True, pno1 signifies the parent patent.
+# if citations = True, pno1 signifies the child patent.
 # rankI signifies the rank (1 - n) of the term in that patent's
 # top-n tf-idf terms.
 def shared_term_ranks(num_sh_terms, top_n, citations = True, texts_already_ordered = False, verbose = False, fname_suffix='', patCol_to_update=patns, write_freq = 1000):
@@ -472,7 +472,7 @@ def shared_term_ranks(num_sh_terms, top_n, citations = True, texts_already_order
 
 
 	while (sh_term_count < num_sh_terms):
-		# if citations, p1 is the parent, p2 the child
+		# if citations, p1 is the child, p2 the parent
 		p1, p2 = selector.get_pair(citations)
 		# each patent's top terms
 		tts1, tts2 = topNTerms(p1, top_n, patCol_to_update), topNTerms(p2, top_n, patCol_to_update)
