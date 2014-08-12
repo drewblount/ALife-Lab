@@ -528,7 +528,7 @@ def top_n_rank_dist(n, num_samples, from_cites, patCol_to_update = False, texts_
 		nth_ranks = count_pat(p2, nth_ranks)
 	
 	ranknums = [nth_ranks.count(i) for i in range(1,n+1)]
-	cite_label = 'cite-pair' if is_citepair else 'random'
+	cite_label = 'cite-pair' if from_cites else 'random'
 
 	csv_module.save_csv(ranknums, 'rank_dist_%s_pats_topn=%d_num=%d' % (cite_label,n,num_samples))
 
