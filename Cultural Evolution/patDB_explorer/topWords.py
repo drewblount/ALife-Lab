@@ -514,17 +514,18 @@ def top_n_rank_dist(n, num_samples, from_cites, patCol_to_update = False, texts_
 	nth_ranks = []
 	selector = get_selector(texts_already_ordered)
 
-	def count_pat(p):
+	def count_pat(p, nth_ranks):
 		# the number, from 1-n, of terms in p's top n
 		p_len = min(p['sorted_text'], n)
 		nth_ranks += [i+1 for i in range(p_len)]
+		return nth_ranks
 
 	# patents are chosen two-at-a-time because that code's already
 	# written. the %2 makes sure odd numbers are overshot, not under
 	for i in range(num_samples/2 + num_samples%2):
 		p1, p2 = selector.get_pair(from_cites)
-		count_pat(p1)
-		count_pat(p2)
+		nth_ranks = count_pat(p1, nth_ranks)
+		nth_ranks = count_pat(p2, nth_ranks)
 	
 	ranknums = [nth_ranks.count(i) for i in range(1,n+1)]
 	csv_module.save_csv(ranknums, 'rank_dist_%s_pats_topn=%d_num=%d' % (cite_label,n,num_samples))
