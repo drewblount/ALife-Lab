@@ -516,7 +516,7 @@ def top_n_rank_dist(n, num_samples, from_cites, patCol_to_update = False, texts_
 
 	def count_pat(p, nth_ranks):
 		# the number, from 1-n, of terms in p's top n
-		p_len = min(p['sorted_text'], n)
+		p_len = min(len(p['sorted_text']), n)
 		nth_ranks += [i+1 for i in range(p_len)]
 		return nth_ranks
 
