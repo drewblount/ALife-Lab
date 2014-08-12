@@ -498,7 +498,43 @@ def shared_term_ranks(num_sh_terms, top_n, citations = True, texts_already_order
 	outf.close()
 
 
+# at Mark's request, returns an array of the number of terms which are
+# the ith most important term for i from 1-n, for num samples patents.
+# If from_cites, the patents will be chosen as following: a citation-link
+# (parent/child pair) will be chosen from all citation-links
+# in the database with equal probability, and those will be two of the
+# patents sampled, repeatedly. Otherwise each patent sampled is chosen
+# from all patents with equal probability
+def top_n_rank_dist(n, num_samples, from_cites, patCol_to_update = False, texts_already_ordered=False, plot=True):
 
+	# maybe an odd way of doing it, but allows for use of pyplot.hist
+	# this code will only run once anyway
+	# nth ranks is a list of all of the ranks that appear in a patent
+	# it'll look like [1,2,...,n,1,2,...,n-1,1,2,...,n-3,1,2,...,n,1,2...]
+	nth_ranks = []
+	selector = get_selector(texts_already_ordered)
+
+	def count_pat(p):
+		# the number, from 1-n, of terms in p's top n
+		p_len = min(p['sorted_text'], n)
+		nth_ranks += [i+1 for i in range p_len]
+
+	# patents are chosen two-at-a-time because that code's already
+	# written. the %2 makes sure odd numbers are overshot, not under
+	for i in range(num_samples/2 + num_samples%2):
+		p1, p2 = selector.get_pair(from_cites)
+		count_pat(p1)
+		count_pat(p2)
+	
+	ranknums = [nth_ranks.count(i) for i in range(1,n+1)]
+	csv_module.save_csv(ranknums, 'rank_dist_%s_pats_topn=%d_num=%d' % (cite_label,n,num_samples))
+
+	if plot:
+		from matplotlib import pyplot as plt
+		plt.hist(nth_ranks,n)
+		cite_label = 'cite-pair' if is_citepair else 'random'
+		plt.title('terms of rank i in the top %d terms of %d %s patents' % (n, num_samples, cite_label))
+		plt.savefig('%_topn=%d_term_rank_dist.png')
 
 
 
