@@ -528,12 +528,13 @@ def top_n_rank_dist(n, num_samples, from_cites, patCol_to_update = False, texts_
 		nth_ranks = count_pat(p2, nth_ranks)
 	
 	ranknums = [nth_ranks.count(i) for i in range(1,n+1)]
+	cite_label = 'cite-pair' if is_citepair else 'random'
+
 	csv_module.save_csv(ranknums, 'rank_dist_%s_pats_topn=%d_num=%d' % (cite_label,n,num_samples))
 
 	if plot:
 		from matplotlib import pyplot as plt
 		plt.hist(nth_ranks,n)
-		cite_label = 'cite-pair' if is_citepair else 'random'
 		plt.title('terms of rank i in the top %d terms of %d %s patents' % (n, num_samples, cite_label))
 		plt.savefig('%_topn=%d_term_rank_dist.png')
 
