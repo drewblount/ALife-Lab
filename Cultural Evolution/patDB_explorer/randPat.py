@@ -33,6 +33,10 @@ def has_tf_idfs(pat):
 		if 'tf-idf' in pat['text'][word]: return True
 		else: return False
 
+def has_sorted_text(pat):
+	if 'sorted_text' not in pat: return False
+	else: return True
+
 
 
 # a random patent selector. 'projection' is a mongodb projection
@@ -73,7 +77,7 @@ class Selector(object):
 	# few pnos between min_pno and max_pno; this results in a non-uniform
 	# random distribution
 	# enforce_func is a boolean function which must eval to tr
-	def rand_pat(self, retryIfAbsent=True, enforce_func=has_tf_idfs):
+	def rand_pat(self, retryIfAbsent=True, enforce_func=has_sorted_text):
 		rand_pno = random.randint(self.min_pno, self.max_pno)
 		if self.verbose: print 'rand pno is ' + str(rand_pno)
 		randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
@@ -111,7 +115,7 @@ class Selector(object):
 
 	# enforce_func is a boolean test each patent must pass to be
 	# returned
-	def get_rand_cite(self, enforce_func = has_tf_idfs):
+	def get_rand_cite(self, enforce_func = has_sorted_text):
 		if not self.rand_cites.alive:
 			self.stock_n_cite_pairs(self.cite_buf_size)
 
