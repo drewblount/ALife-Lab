@@ -517,7 +517,7 @@ def top_n_rank_dist(n, num_samples, from_cites, patCol_to_update = False, texts_
 	def count_pat(p):
 		# the number, from 1-n, of terms in p's top n
 		p_len = min(p['sorted_text'], n)
-		nth_ranks += [i+1 for i in range p_len]
+		nth_ranks += [i+1 for i in range(p_len)]
 
 	# patents are chosen two-at-a-time because that code's already
 	# written. the %2 makes sure odd numbers are overshot, not under
