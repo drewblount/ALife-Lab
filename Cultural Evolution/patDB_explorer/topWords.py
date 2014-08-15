@@ -522,7 +522,8 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False):
 		tf_idf = p['sorted_text'][term_rank-1]['tf-idf']
 		idf = tf_idf/tf
 		df = idf_to_df(idf, num_docs)
-		return df
+		# makes into a simple int
+		return int(round(df))
 		
 
 	# makes file name from input params
