@@ -519,7 +519,7 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False):
 		# since df isn't stored, but tf and tf-idf are, df can be deduced
 		# without memory-expensive lookups in the df dictionary, elsewhere
 		tf = p['sorted_text'][term_rank-1]['tf']
-		tf_idf = tf = p['sorted_text'][term_rank]['tf-idf']
+		tf_idf = tf = p['sorted_text'][term_rank-1]['tf-idf']
 		idf = tf_idf/tf
 		df = idf_to_df(idf, num_docs)
 		return df
