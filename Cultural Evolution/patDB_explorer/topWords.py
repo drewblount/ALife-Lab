@@ -550,14 +550,16 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False):
 	
 	# for the non-header rows:
 	for i in range(1, len(fdata)):
-		for j in (0,1):
-			if verbose: print 'data position (%d, %d)' % (i, j)
-			# fdata[i] format is pno0, pno1, rank0, rank1
-			pno, rank = int(fdata[i][0+j]), int(fdata[i][2+j])
-			# calculate df
-			df = get_freq(pno, rank, num_docs)
-			# stores the df
-			dfs[j][rank-1].append(df)
+		# sometimes 'pno1' is printed where it shouldn't
+		if (fdata[i][0] != 'pno1'):
+			for j in (0,1):
+				if verbose: print 'data position (%d, %d)' % (i, j)
+				# fdata[i] format is pno0, pno1, rank0, rank1
+				pno, rank = int(fdata[i][0+j]), int(fdata[i][2+j])
+				# calculate df
+				df = get_freq(pno, rank, num_docs)
+				# stores the df
+				dfs[j][rank-1].append(df)
 
 	foutn = 'df_by_rank_%s-pairs_topn=%d_num=%d%s' % (pair_label, top_n, num_sh_terms, fname_suffix)
 	# there will be an out file for each patent group
