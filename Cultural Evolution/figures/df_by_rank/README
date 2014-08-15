@@ -1,0 +1,11 @@
+each .csv contains 13 rows of data, where the ith row is a list of the document
+frequencies of shared words of rank i.
+
+For random patents, p1 and p2 are names for the patents which were randomly
+chosen first and second, so we don't expect to see a significant difference between
+those data (and we don't see such a difference).
+
+For citation pairs, p1 represents CHILDREN, and p2 parents (this is a little unintuitive, I know,
+but I set the standard at some point and wish only to be internally consistent). Again, it seems
+that there's a big difference between the distribution of cite and random pairs of patents,
+but little difference between parents and children.
