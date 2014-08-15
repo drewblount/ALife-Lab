@@ -1,5 +1,6 @@
 import csv
 from pymongo import MongoClient
+import os
 
 patDB = MongoClient().patents
 patns = patDB.patns
@@ -10,7 +11,11 @@ glob_max = metadata.find_one({'_id':'max_pno'})['val']
 glob_min = metadata.find_one({'_id':'min_pno'})['val']
 
 
-def save_csv(value_array, out_name, trail_endl=True):
+def save_csv(value_array, out_name, trail_endl=True, overwrite=False):
+	if overwrite:
+	try: os.remove(out_name)
+	except OSError: pass
+
 	# using the 'a' tag means that if the file already exists, it is appended to
 	outf = open(out_name + '.csv', 'a')
 	# the comma at the end is important for bulk writes
@@ -19,11 +24,22 @@ def save_csv(value_array, out_name, trail_endl=True):
 		outf.write('\n')
 	outf.close()
 
-def save_csvs(list_of_value_arrays, out_name):
+def save_csvs(list_of_value_arrays, out_name, overwrite=False):
+	if overwrite:
+	try: os.remove(out_name)
+	except OSError: pass
+
 	for i in range( len(list_of_value_arrays) ):
 		outf = open(out_name + '.' + str(i+1) + '.csv', 'a+')
 		outf.write(','.join( map(str, list_of_value_arrays[i]) )+',' )
 		outf.close()
+
+def save_multi_csv(array_of_val_arrays, out_name, overwrite=False)
+	if overwrite:
+		try: os.remove(out_name)
+		except OSError: pass
+	for val_array in array_of_val_arrays:
+		save_csv(val_array, out_name)
 
 
 # kwargs is a dict of func's arguments. func is assumed to take min_pno and max_pno args,

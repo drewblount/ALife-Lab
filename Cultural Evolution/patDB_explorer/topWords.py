@@ -567,7 +567,7 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False):
 	fout_tags = ('p1','p2')
 
 	for i in (0,1):
-		csv_module.save_csv(dfs[i],foutn+fout_tags[i])
+		csv_module.save_multi_csv(dfs[i],foutn+fout_tags[i])
 
 # at Mark's request, returns an array of the number of terms which are
 # the ith most important term for i from 1-n, for num samples patents.
