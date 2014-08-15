@@ -538,6 +538,8 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False):
 			# different formatting than other cases
 			fdata += row
 
+	if verbose: print fdata
+
 	# the ith position of dfs[j] is a list of all doc-freqs of the
 	# shared terms which ranked (i+1) in a patent of group j
 	# (in cite-pairs, j=0:children, j=1:parents)
