@@ -506,6 +506,17 @@ def shared_term_ranks(num_sh_terms, top_n, citations = True, texts_already_order
 # if saveFreq = n, saves after every n terms. Else just saves at the end
 def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False, save_freq = False):
 
+
+	# makes file name from input params
+	# (based on save format of shared_term_ranks)
+	pair_label = 'cite' if cite_pairs else 'rand'
+	fname = 'sh_term_ranks_%s-pairs_topn=%d_num=%d%s.csv' % (pair_label, top_n, num_sh_terms, fname_suffix)
+
+	foutn = 'df_by_rank_%s-pairs_topn=%d_num=%d%s' % (pair_label, top_n, num_sh_terms, fname_suffix)
+		# there will be an out file for each patent group
+	fout_tags = ('p1','p2')
+
+
 	# I'll first define a couple helper functions to keep things neat.
 
 	# idf = log(N/df) where N = number of total documents in corpus
@@ -527,10 +538,6 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False, 
 		return int(round(df))
 		
 
-	# makes file name from input params
-	# (based on save format of shared_term_ranks)
-	pair_label = 'cite' if cite_pairs else 'rand'
-	fname = 'sh_term_ranks_%s-pairs_topn=%d_num=%d%s.csv' % (pair_label, top_n, num_sh_terms, fname_suffix)
 
 	# open fname, load it into an array
 	fdata = []
@@ -567,9 +574,6 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False, 
 				csv_module.save_multi_csv(dfs[i],foutn+fout_tags[i], overwrite=True)
 
 
-	foutn = 'df_by_rank_%s-pairs_topn=%d_num=%d%s' % (pair_label, top_n, num_sh_terms, fname_suffix)
-	# there will be an out file for each patent group
-	fout_tags = ('p1','p2')
 
 	for i in (0,1):
 		csv_module.save_multi_csv(dfs[i],foutn+fout_tags[i], overwrite=True)
