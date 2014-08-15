@@ -34,7 +34,7 @@ def save_csvs(list_of_value_arrays, out_name, overwrite=False):
 		outf.write(','.join( map(str, list_of_value_arrays[i]) )+',' )
 		outf.close()
 
-def save_multi_csv(array_of_val_arrays, out_name, overwrite=False)
+def save_multi_csv(array_of_val_arrays, out_name, overwrite=False):
 	if overwrite:
 		try: os.remove(out_name)
 		except OSError: pass
