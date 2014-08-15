@@ -569,7 +569,7 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False, 
 				df = get_freq(pno, rank, num_docs)
 				# stores the df
 				dfs[j][rank-1].append(df)
-		if i % save_freq == 0:
+		if save_freq and i % save_freq == 0:
 			for i in (0,1):
 				csv_module.save_multi_csv(dfs[i],foutn+fout_tags[i], overwrite=True)
 
