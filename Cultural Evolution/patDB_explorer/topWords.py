@@ -555,7 +555,7 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False):
 			# fdata[i] format is pno0, pno1, rank0, rank1
 			pno, rank = int(fdata[i][0+j]), int(fdata[i][2+j])
 			# calculate df
-			df = get_freq(pno, rank, num_doc)
+			df = get_freq(pno, rank, num_docs)
 			# stores the df
 			dfs[j][rank-1].append(df)
 
