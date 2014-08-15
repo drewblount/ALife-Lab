@@ -1,0 +1,3 @@
+Each plot displays the distributions of document frequencies of words shared
+between patent pairs, binned by what rank each term was in its patent's top
+13 words.
