@@ -536,7 +536,7 @@ def df_by_rank(num_sh_terms, top_n, cite_pairs, fname_suffix='', verbose=False):
 		reader = csv.reader(csvf, delimiter=',')
 		for row in reader:
 			# different formatting than other cases
-			fdata += row
+			fdata.append(row)
 
 	if verbose: print fdata
 
