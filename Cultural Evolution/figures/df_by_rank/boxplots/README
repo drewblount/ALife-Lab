@@ -1,0 +1,23 @@
+Each plot displays the distributions of document frequencies of words shared
+between patent pairs, binned by what rank each term was in its patent's top
+13 words.
+
+Each box-and-whisker plot shows:
+  + the median of the distribution as a red bar
+  + the upper and lower quartiles as the top and bottom of the box
+  + the standard range of data as the whiskers
+  + outliers as points beyond the whiskers
+    
+
+I'm not exactly sure how pyplot determines what an outlier is, but
+assume it has to do with standard deviations or inter-quartile-ranges,
+both of which explain why the whiskers extend close to zero below each
+box.
+
+I checked what the minimum doc frequencies are for each bin/box, to
+explain why each bottom-whisker apparently extends down to 0.
+
+MINIMUM DOCUMENT FREQUENCIES of shared terms of rank n, for n from 1-13
+all random pairs: [106, 82, 224, 29, 208, 29, 106, 91, 178, 450, 247, 560, 540]
+all parents: [2, 2, 3, 3, 2, 8, 3, 4, 2, 2, 6, 15, 16]
+all children: [2, 2, 4, 3, 3, 2, 6, 4, 9, 2, 16, 23, 12]

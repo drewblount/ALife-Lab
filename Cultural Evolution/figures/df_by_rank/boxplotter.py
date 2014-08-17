@@ -14,7 +14,12 @@ def openup(fname):
 	return to_int_2d(out)
 
 def stats(array2d):
-	return [ (mean(arr), std(arr), len(arr)) for arr in array2d ]
+	return [{
+			'mean': mean(arr),
+			'standard dev': std(arr),
+			'length': len(arr),
+			'min': min(arr),
+			'max': max(arr)} for arr in array2d ]
 
 def pretprint(arr2d):
 	for row in arr2d:
@@ -24,6 +29,7 @@ fnames=('rand-pairs_topn=13_num=100000p1.csv',
 		'rand-pairs_topn=13_num=100000p2.csv',
 		'cite-pairs_topn=13_num=100000p1.csv',
 		'cite-pairs_topn=13_num=100000p2.csv',)
+
 
 (rp1, rp2, cp1, cp2) = (openup(fn) for fn in fnames)
 
