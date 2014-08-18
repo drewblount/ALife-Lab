@@ -1,5 +1,6 @@
 In this folder are plots where representations of two related 
-data-sets are superimposed:
+data-sets are superimposed, in both cases the data derived from the
+100,000-term .csvs in the [containing folder](https://github.com/drewblount/ALife-Lab/tree/master/Cultural%20Evolution/figures/df_by_rank):
 
 1. The document-frequencies of shared terms, ordered by the tf-idf
    rank of those terms in the patents which share them
