@@ -82,10 +82,10 @@ class Pair_data(object):
 			out_arr.append([self.output[i][key] for key in keys])
 
 			if write_freq and i % write_freq == 0:
-				csv_module.save_muli_csv(out_arr,outfname)
+				csv_module.save_multi_csv(out_arr,outfname)
 				out_arr=[]
 				
-		csv_module.save_muli_csv(out_arr,outfname,overwrite)
+		csv_module.save_multi_csv(out_arr,outfname,overwrite)
 
 
 # as a proof of this framework, here's a refactoring of
