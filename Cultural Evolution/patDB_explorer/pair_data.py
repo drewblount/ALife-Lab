@@ -85,7 +85,7 @@ class Pair_data(object):
 				csv_module.save_multi_csv(out_arr,outfname)
 				out_arr=[]
 				
-		csv_module.save_multi_csv(out_arr,outfname,overwrite)
+		csv_module.save_multi_csv(out_arr,outfname,overwrite=False)
 
 
 # as a proof of this framework, here's a refactoring of
