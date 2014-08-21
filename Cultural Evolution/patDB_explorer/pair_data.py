@@ -29,7 +29,7 @@
 
 from pymongo import MongoClient
 import csv_module
-from topWords import get_selector, topNTerms
+from topWords import get_selector, topNTerms, shared_n_vector
 
 patDB = MongoClient().patents
 patns = patDB.patns
@@ -123,9 +123,49 @@ def sh_term_ranks(top_n, cites, fname=''):
 	return Pair_data(get_pair, proc_pair, fname)
 
 
+# selector's projection (and maybe enforce_func?) has to include rawcites
+def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
+	child = selector.rand_pat()
+	out = []
+	for cited_num in child['rawcites']:
+		parent = patns.find_one({'pno': cited_num}) if is_cite else selector.rand_pat()
+		if parent:
+			# check that parent has all the required fields
+			has_field = [field in parent for field in required_fields]
+			if has_field == [True for i in range(len(has_text))]:
+				# each entry in out is a tuple of patents
+				out.append((child, parent))
+	return out
 
 
 
+
+# Question: if we look at each patent's top n terms, how many
+# terms do we expect a patent to share with any of its citation
+# parents? Answer: the sum of the 2+nth column of the output of this
+# function, divided by num_pats ( 2+n bc 1 and 2 are child and parent pno).
+# If cites=False, chooses a 'child' patent at random,
+# then pairs it with as many random 'parents' as the patent has
+# real cite-parents.
+def parent_sh_count_vects(up_to_n, num_pairs, is_cite=True, fname_suffix=''):
+
+	selector = get_selector
+	def get_pair():
+		return get_parent_pairs(is_cite, selector)
+
+	def proc_pair(child, parent):
+		# with topWords.shared_n_vector, produces a vector whose
+		# ith position is the number of words child and parent share
+		# among their top i terms
+		shared_vect = shared_n_vector(child, parent, up_to_n)
+		out_dict = {i: shared_vect[i] for i in range(up_to_n)}
+		out_dict['child_pno'] = child['pno']
+		out_dict['parent_pno'] = parent['pno']
+		return out_dict
+
+	fname = 'sh_count_vects_n=%d_num=%d%s' % (up_to_n, num_pairs, fname_suffix)
+
+	return Pair_data(get_pair, proc_pair, fname)
 
 
 
