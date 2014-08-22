@@ -154,9 +154,12 @@ def parent_sh_count_vects(up_to_n, is_cite=True, fname_suffix=''):
 	selector = Selector(patns, projection={'sorted_text':1,'pno':1,'rawcites':1,'_id':0}, verbose=False)
 	
 	reserve_pairs = get_parent_pairs(is_cite, selector)
+	def reset_reserve(reserve_pairs):
+		reserve_pairs = get_parent_pairs(is_cite, selector)
+	
 	def get_pair():
 		while len(reserve_pairs)==0:
-			reserve_pairs = get_parent_pairs(is_cite, selector)
+			reset_reserve(reserve_pairs)
 		return reserve_pairs.pop()
 
 	def proc_pair(child, parent):
