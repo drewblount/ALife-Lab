@@ -135,7 +135,7 @@ def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 		if parent:
 			# check that parent has all the required fields
 			has_field = [field in parent for field in required_fields]
-			if has_field == [True for i in range(len(has_text))]:
+			if has_field == [True for i in range(len(has_field))]:
 				# each entry in out is a tuple of patents
 				out.append((child, parent))
 	return out
