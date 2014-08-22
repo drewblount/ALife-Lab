@@ -219,11 +219,11 @@ def compareTopN(sourceP, citeP, n, patCol_to_update = False, verbose = False):
 # If texts are already sorted, we save a lot of memory by
 # not retrieving the unsorted texts. Otherwise, those are retrieved
 # so that they can be sorted
-def get_selector(texts_already_ordered = False):
+def get_selector(texts_already_ordered = False, verbose=False):
 	if texts_already_ordered:
-		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'sorted_text': 1, '_id': 0})
+		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'sorted_text': 1, '_id': 0}, verbose=verbose)
 	else:
-		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1, '_id': 0})
+		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1, '_id': 0},verbose=verbose)
 
 
 # if citations = True, returns the avg shared terms among patents where
