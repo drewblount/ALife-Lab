@@ -40,11 +40,15 @@ class Pair_data(object):
 	def __init__(self, get_pair, proc_pair, fname=''):
 				
 		# a function that returns a list of patent-pair tuples
+		print('e')
 		self.get_pair  = get_pair
 		# a function that turns a pat-pair tuple into a dict of output data
+		print('f')
 		self.proc_pair = proc_pair
-
+		
+		print('g')
 		self.pair_stack = self.get_pair()
+		print('h')
 		self.output = []
 		self.fname = fname
 
