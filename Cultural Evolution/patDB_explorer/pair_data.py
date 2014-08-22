@@ -137,7 +137,8 @@ def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 				out.append((child, parent))
 	return out
 
-
+def enforce_sorted_text_rawcites(pat):
+	return 'sorted_text' in pat and 'rawcites' in pat
 
 
 # Question: if we look at each patent's top n terms, how many
@@ -149,7 +150,7 @@ def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 # real cite-parents.
 def parent_sh_count_vects(up_to_n, num_pairs, is_cite=True, fname_suffix=''):
 
-	selector = get_selector()
+	selector = get_selector(enforce_func=enforce_sorted_text_rawcites)
 	def get_pair():
 		return get_parent_pairs(is_cite, selector)
 
