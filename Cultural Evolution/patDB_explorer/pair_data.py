@@ -157,7 +157,7 @@ def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 # real cite-parents.
 def parent_sh_count_vects(up_to_n, is_cite=True, fname_suffix=''):
 
-	selector = get_selector(verbose=True)
+	selector = get_selector(verbose=True, projection={'sorted_text':1,'pno':1,'rawcites':1,'_id':0})
 	def get_pair():
 		return get_parent_pairs(is_cite, selector)
 
