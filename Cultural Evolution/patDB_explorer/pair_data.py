@@ -145,11 +145,13 @@ def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 # If cites=False, chooses a 'child' patent at random,
 # then pairs it with as many random 'parents' as the patent has
 # real cite-parents.
-def parent_sh_count_vects(up_to_n, num_pairs, is_cite=True, fname_suffix=''):
+def parent_sh_count_vects(up_to_n, is_cite=True, fname_suffix=''):
 
+	print('a')
 	selector = get_selector()
 	def get_pair():
 		return get_parent_pairs(is_cite, selector)
+	print('b')
 
 	def proc_pair(child, parent):
 		# with topWords.shared_n_vector, produces a vector whose
@@ -161,9 +163,12 @@ def parent_sh_count_vects(up_to_n, num_pairs, is_cite=True, fname_suffix=''):
 		out_dict['parent_pno'] = parent['pno']
 		return out_dict
 
+	print('c')
 	fname = 'sh_count_vects_n=%d_num=%d%s' % (up_to_n, num_pairs, fname_suffix)
 
+	print('d')
 	return Pair_data(get_pair, proc_pair, fname)
+
 
 
 
