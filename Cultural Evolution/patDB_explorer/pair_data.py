@@ -122,10 +122,9 @@ def sh_term_ranks(top_n, cites, fname=''):
 
 	return Pair_data(get_pair, proc_pair, fname)
 
-
 # selector's projection (and maybe enforce_func?) has to include rawcites
 def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
-	child = selector.rand_pat()
+	child = selector.rand_pat(enforce_func=enforce_sorted_text_rawcites)
 	out = []
 	for cited_num in child['rawcites']:
 		parent = patns.find_one({'pno': cited_num}) if is_cite else selector.rand_pat()
@@ -137,8 +136,6 @@ def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 				out.append((child, parent))
 	return out
 
-def enforce_sorted_text_rawcites(pat):
-	return 'sorted_text' in pat and 'rawcites' in pat
 
 
 # Question: if we look at each patent's top n terms, how many
@@ -150,7 +147,7 @@ def enforce_sorted_text_rawcites(pat):
 # real cite-parents.
 def parent_sh_count_vects(up_to_n, num_pairs, is_cite=True, fname_suffix=''):
 
-	selector = get_selector(enforce_func=enforce_sorted_text_rawcites)
+	selector = get_selector()
 	def get_pair():
 		return get_parent_pairs(is_cite, selector)
 
