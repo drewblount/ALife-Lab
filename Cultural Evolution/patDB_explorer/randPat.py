@@ -84,6 +84,7 @@ class Selector(object):
 		if retryIfAbsent:
 			while not randy or not enforce_func(randy):
 				rand_pno = random.randint(self.min_pno, self.max_pno)
+				if self.verbose: print 'rand pno is ' + str(rand_pno)
 				randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
 		return randy
 	

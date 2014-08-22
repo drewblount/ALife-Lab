@@ -125,7 +125,7 @@ def sh_term_ranks(top_n, cites, fname=''):
 # selector's projection (and maybe enforce_func?) has to include rawcites
 def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 	print('a')
-	child = selector.rand_pat(enforce_func=enforce_sorted_text_rawcites)
+	child = selector.rand_pat(enforce_func=enforce_sorted_text_rawcites, verbose=True)
 	out = []
 	print('b')
 	for cited_num in child['rawcites']:
