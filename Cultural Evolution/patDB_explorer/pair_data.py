@@ -156,7 +156,7 @@ def parent_sh_count_vects(up_to_n, is_cite=True, fname_suffix=''):
 	reserve_pairs = get_parent_pairs(is_cite, selector)
 	def get_pair():
 		while len(reserve_pairs)==0:
-			reserve_pairs = get_parent_pairs(is_cite, selector)
+			print 'ooooo'
 		return reserve_pairs.pop()
 
 	def proc_pair(child, parent):
