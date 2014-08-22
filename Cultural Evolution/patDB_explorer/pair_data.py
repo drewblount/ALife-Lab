@@ -152,8 +152,11 @@ def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 def parent_sh_count_vects(up_to_n, is_cite=True, fname_suffix=''):
 
 	selector = Selector(patns, projection={'sorted_text':1,'pno':1,'rawcites':1,'_id':0}, verbose=False)
+	
+	reserve_pairs = get_parent_pairs(is_cite, selector)
 	def get_pair():
-		return get_parent_pairs(is_cite, selector)
+		while not reserve_pairs: reserve_pairs = get_parent_pairs(is_cite, selector)
+		return reserve_pairs.pop()
 
 	def proc_pair(child, parent):
 		# with topWords.shared_n_vector, produces a vector whose
