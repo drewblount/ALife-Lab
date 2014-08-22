@@ -30,6 +30,7 @@
 from pymongo import MongoClient
 import csv_module
 from topWords import get_selector, topNTerms, shared_n_vector
+from randPat import Selector
 
 patDB = MongoClient().patents
 patns = patDB.patns
@@ -127,23 +128,16 @@ def enforce_sorted_text_rawcites(pat):
 
 # selector's projection (and maybe enforce_func?) has to include rawcites
 def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
-	print('a')
 	child = selector.rand_pat(enforce_func=enforce_sorted_text_rawcites)
 	out = []
-	print('b')
 	for cited_num in child['rawcites']:
-		print('c')
 		parent = patns.find_one({'pno': cited_num}) if is_cite else selector.rand_pat()
-		print('d')
 		if parent:
 			# check that parent has all the required fields
 			has_field = [field in parent for field in required_fields]
-			print('e')
 			if has_field == [True for i in range(len(has_text))]:
 				# each entry in out is a tuple of patents
-				print('f')
 				out.append((child, parent))
-	print('g')
 	return out
 
 
@@ -157,7 +151,7 @@ def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 # real cite-parents.
 def parent_sh_count_vects(up_to_n, is_cite=True, fname_suffix=''):
 
-	selector = get_selector(verbose=True, projection={'sorted_text':1,'pno':1,'rawcites':1,'_id':0})
+	selector = Selector(patns, projection={'sorted_text':1,'pno':1,'rawcites':1,'_id':0}, verbose=False)
 	def get_pair():
 		return get_parent_pairs(is_cite, selector)
 
