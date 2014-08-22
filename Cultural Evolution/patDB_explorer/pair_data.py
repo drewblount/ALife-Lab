@@ -164,7 +164,7 @@ def parent_sh_count_vects(up_to_n, is_cite=True, fname_suffix=''):
 		return out_dict
 
 	print('c')
-	fname = 'sh_count_vects_n=%d_num=%d%s' % (up_to_n, num_pairs, fname_suffix)
+	fname = 'sh_count_vects_num=%d%s' % (up_to_n, fname_suffix)
 
 	print('d')
 	return Pair_data(get_pair, proc_pair, fname)
