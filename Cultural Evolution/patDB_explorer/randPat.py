@@ -86,6 +86,7 @@ class Selector(object):
 				rand_pno = random.randint(self.min_pno, self.max_pno)
 				if self.verbose: print 'rand pno is ' + str(rand_pno)
 				randy = self.col.find_one( {'pno' : rand_pno}, self.proj)
+				if self.verbose: print str(enforce_func(randy))
 		return randy
 	
 	# Allows you to choose two different patents at random, checking that
