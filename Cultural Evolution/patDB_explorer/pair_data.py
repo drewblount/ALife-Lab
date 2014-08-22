@@ -122,6 +122,9 @@ def sh_term_ranks(top_n, cites, fname=''):
 
 	return Pair_data(get_pair, proc_pair, fname)
 
+def enforce_sorted_text_rawcites(pat):
+	return 'sorted_text' in pat and 'rawcites' in pat
+
 # selector's projection (and maybe enforce_func?) has to include rawcites
 def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 	print('a')
