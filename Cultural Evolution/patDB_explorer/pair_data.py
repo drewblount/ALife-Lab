@@ -40,15 +40,11 @@ class Pair_data(object):
 	def __init__(self, get_pair, proc_pair, fname=''):
 				
 		# a function that returns a list of patent-pair tuples
-		print('e')
 		self.get_pair  = get_pair
 		# a function that turns a pat-pair tuple into a dict of output data
-		print('f')
 		self.proc_pair = proc_pair
 		
-		print('g')
 		self.pair_stack = self.get_pair()
-		print('h')
 		self.output = []
 		self.fname = fname
 
@@ -128,16 +124,23 @@ def sh_term_ranks(top_n, cites, fname=''):
 
 # selector's projection (and maybe enforce_func?) has to include rawcites
 def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
+	print('a')
 	child = selector.rand_pat(enforce_func=enforce_sorted_text_rawcites)
 	out = []
+	print('b')
 	for cited_num in child['rawcites']:
+		print('c')
 		parent = patns.find_one({'pno': cited_num}) if is_cite else selector.rand_pat()
+		print('d')
 		if parent:
 			# check that parent has all the required fields
 			has_field = [field in parent for field in required_fields]
+			print('e')
 			if has_field == [True for i in range(len(has_text))]:
 				# each entry in out is a tuple of patents
+				print('f')
 				out.append((child, parent))
+	print('g')
 	return out
 
 
@@ -151,11 +154,9 @@ def get_parent_pairs(is_cite, selector, required_fields=['sorted_text']):
 # real cite-parents.
 def parent_sh_count_vects(up_to_n, is_cite=True, fname_suffix=''):
 
-	print('a')
 	selector = get_selector()
 	def get_pair():
 		return get_parent_pairs(is_cite, selector)
-	print('b')
 
 	def proc_pair(child, parent):
 		# with topWords.shared_n_vector, produces a vector whose
@@ -167,10 +168,8 @@ def parent_sh_count_vects(up_to_n, is_cite=True, fname_suffix=''):
 		out_dict['parent_pno'] = parent['pno']
 		return out_dict
 
-	print('c')
 	fname = 'sh_count_vects_num=%d%s' % (up_to_n, fname_suffix)
 
-	print('d')
 	return Pair_data(get_pair, proc_pair, fname)
 
 
