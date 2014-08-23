@@ -6,7 +6,7 @@ execfile('topWords.py')
 
 def compare(n, m):
     for is_cite in (True, False):
-        multip_sh_term_vects(n, m, is_cite=is_cite, False, 1)
+        multip_sh_term_vects(n, m, is_cite=is_cite, texts_already_ordered=False, write_freq=100)
         
 for m in (1000, 10000, 100000):
     print 'comparing children=%d' % m
