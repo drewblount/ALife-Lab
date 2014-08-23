@@ -69,7 +69,9 @@ def displaySortedWord(word):
 	print pstring
 
 
-def topNTerms(patn, n, patCol_to_update = False, display=False):
+# note: i changed the default patCol_to_update to patns from None. I hope that doesn't
+# awaken any bugs, like cursed scarabs
+def topNTerms(patn, n, patCol_to_update = patns, display=False):
 	if 'sorted_text' not in patn:
 		patn['sorted_text'] = createSortedText(patn)
 		# if the optional patCol_to_update arg is used, and the patent's text has never
@@ -153,6 +155,74 @@ def add_sh_vector(v1, v2):
 	out_v = [v1[i] + v2[i] for i in range(len(v1))]
 	return out_v
 
+
+# Like  shared_n_vector above, but takes one patent and returns the vector whose
+# ith term is the number of top i terms that patent shares with ANY
+# parent. if is_cite=false, instead of comparing a patent to each of its
+# C citations, it is compared to C random patents.
+def multip_sh_term_vect(child, up_to_n, is_cite, inc_pno=True):
+	out_vect = [0 for i in range(up_to_n)]
+
+	ch_words = topNTerms(child, up_to_n)
+	# to quickly look-up what's in words. Each key is the word and the value is its rank-1
+	ch_dict = {ch_words[i]['word']: i for i in range(up_to_n)}
+
+	sel = get_selector() if not is_cite else None
+	
+	out_vect = [0 for i in range(up_to_n)]
+
+	for parent_pno in child['rawcites']:
+		# parent is either a cited patent or a random patent depending on is_cite,
+		# though if not is_cite, there are exactly as many random parents as there would
+		# be citations
+		parent = patns.find_one({'pno':parent_pno},{'pno':1,'text':1,'sorted_text':1}) if is_cite else sel.rand_pat()
+		if parent:
+			par_words = topNTerms(parent, up_to_n)
+			for p_word in par_words:
+				pw = p_word['word']
+				# if there's a word match
+				if pw in ch_dict:
+					# indicate what the minimum number of shared terms is to guarantee that match
+					out_vect[ch_dict[pw]] += 1
+					# remove the word from ch_dict so we don't count when a word is shared by multiple
+					# parents (that data is combed over in pair_data.py)
+					ch_dict.pop(pw)
+	# now out_vect[i] is the number of terms that are shared when you look at the top i terms,
+	# but not if you only look at the top (i-1), so either 1 or 0.
+	# Now I change that so out_vect[i]=num terms shared with any parent among the top i terms.
+	for i in range(1, up_to_n):
+		out_vect[i] += out_vect[i-1]
+
+	# inc_pno determines if the output array's final entry is the child's patent number
+	if inc_pno: out_vect.append(child['pno'])
+
+	return out_vect
+
+# calls multip_sh_term_vect m different times, saving the results
+def multip_sh_term_vects(n, m, is_cite=True, texts_already_ordered=False, write_freq=100):
+
+	required_fields=['pno','text','sorted_text','rawcites']
+	sel = get_selector(texts_already_ordered=texts_already_ordered, fields=required_fields)
+
+	fname = 'multip_sh_vects_n=%d_%d%s-children' % (n, m, 'cite' if is_cite else 'rand')
+
+	# a 2d array whose ith entry is an array of the ith output that hasn't been written to
+	# the outfile yet
+	to_write = []
+	
+	for i in range(m):
+		pat = sel.rand_pat(enforce_func=randPat.has_sorted_text_rawcites)
+		out_vect = multip_sh_term_vect(pat, n, is_cite, inc_pno=True)
+		to_write.append(out_vect)
+		if (i+1)% write_freq == 0:
+			csv_module.save_multi_csv(to_write, fname, overwrite=False)
+			to_write = []
+
+	if to_write: csv_module.save_multi_csv(to_write, fname, overwrite=False)
+
+
+
+
 # calls shared_n_vector m different times, summing the result, for shared
 # or unshared patents
 def shared_n_vectors(n, m, cite_pairs=True, texts_already_ordered=False):
@@ -219,11 +289,15 @@ def compareTopN(sourceP, citeP, n, patCol_to_update = False, verbose = False):
 # If texts are already sorted, we save a lot of memory by
 # not retrieving the unsorted texts. Otherwise, those are retrieved
 # so that they can be sorted
-def get_selector(texts_already_ordered = False, verbose=False):
+def get_selector(texts_already_ordered = False, fields=['pno','title','sorted_text'],verbose=False):
+	proj = {field: 1 for field in fields}
+	# explicitly exclude _id unless it was explicitly included
+	if '_id' not in proj: proj['_id'] = 0
+	
 	if texts_already_ordered:
-		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'sorted_text': 1, '_id': 0}, verbose=verbose)
+		return randPat.Selector(patns, projection=proj, verbose=verbose)
 	else:
-		return randPat.Selector(patns, projection={'pno':1, 'title': 1, 'text': 1, 'sorted_text': 1, '_id': 0},verbose=verbose)
+		return randPat.Selector(patns, projection=proj,verbose=verbose)
 
 
 # if citations = True, returns the avg shared terms among patents where

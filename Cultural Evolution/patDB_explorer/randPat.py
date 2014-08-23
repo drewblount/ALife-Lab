@@ -37,6 +37,8 @@ def has_sorted_text(pat):
 	if 'sorted_text' not in pat: return False
 	else: return True
 
+def has_sorted_text_rawcites(pat):
+	return 'rawcites' in pat and 'sorted_text' in pat
 
 
 # a random patent selector. 'projection' is a mongodb projection
