@@ -176,7 +176,8 @@ def multip_sh_term_vect(child, up_to_n, is_cite, inc_pno=True):
 		# though if not is_cite, there are exactly as many random parents as there would
 		# be citations
 		parent = patns.find_one({'pno':parent_pno},{'pno':1,'text':1,'sorted_text':1}) if is_cite else sel.rand_pat()
-		if parent:
+		# TO-CLEAN: some patents in the db (~10%) don't have their tf-idfs stored
+		if parent and has_tf_idfs(parent):
 			par_words = topNTerms(parent, up_to_n)
 			for p_word in par_words:
 				pw = p_word['word']
