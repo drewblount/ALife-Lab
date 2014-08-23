@@ -200,7 +200,7 @@ def multip_sh_term_vect(child, up_to_n, is_cite, inc_pno=True):
 	return out_vect
 
 # calls multip_sh_term_vect m different times, saving the results
-def multip_sh_term_vects(n, m, is_cite=True, texts_already_ordered=False, write_freq=100):
+def multip_sh_term_vects(n, m, is_cite=True, texts_already_ordered=False, write_freq=100, return_out=False):
 
 	required_fields=['pno','text','sorted_text','rawcites']
 	sel = get_selector(texts_already_ordered=texts_already_ordered, fields=required_fields)
@@ -210,6 +210,7 @@ def multip_sh_term_vects(n, m, is_cite=True, texts_already_ordered=False, write_
 	# a 2d array whose ith entry is an array of the ith output that hasn't been written to
 	# the outfile yet
 	to_write = []
+	to_return = [] if return_out else None
 	
 	for i in range(m):
 		pat = sel.rand_pat(enforce_func=randPat.has_sorted_text_rawcites)
@@ -217,9 +218,11 @@ def multip_sh_term_vects(n, m, is_cite=True, texts_already_ordered=False, write_
 		to_write.append(out_vect)
 		if (i+1)% write_freq == 0:
 			csv_module.save_multi_csv(to_write, fname, overwrite=False)
+			if return_out: to_return += to_write
 			to_write = []
 
 	if to_write: csv_module.save_multi_csv(to_write, fname, overwrite=False)
+	if return_out: return to_return
 
 
 
