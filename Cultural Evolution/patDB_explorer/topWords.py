@@ -165,7 +165,7 @@ def multip_sh_term_vect(child, up_to_n, is_cite, inc_pno=True):
 
 	ch_words = topNTerms(child, up_to_n)
 	# to quickly look-up what's in words. Each key is the word and the value is its rank-1
-	ch_dict = {ch_words[i]['word']: i for i in range(up_to_n)}
+	ch_dict = {ch_words[i]['word']: i for i in range(len(ch_words))}
 
 	sel = get_selector() if not is_cite else None
 	
