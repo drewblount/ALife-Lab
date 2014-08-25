@@ -167,8 +167,9 @@ def multip_sh_term_vect(child, up_to_n, is_cite, inc_pno=True):
 	# to quickly look-up what's in words. Each key is the word and the value is its rank-1
 	ch_dict = {ch_words[i]['word']: i for i in range(len(ch_words))}
 
-	sel = get_selector() if not is_cite else None
-	
+	required_fields=['pno','text','sorted_text','rawcites']
+	sel = get_selector(texts_already_ordered=texts_already_ordered, fields=required_fields) if not is_cite else None
+
 	out_vect = [0 for i in range(up_to_n)]
 
 	for parent_pno in child['rawcites']:
