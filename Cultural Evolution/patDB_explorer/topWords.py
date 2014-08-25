@@ -168,7 +168,7 @@ def multip_sh_term_vect(child, up_to_n, is_cite, inc_pno=True):
 	ch_dict = {ch_words[i]['word']: i for i in range(len(ch_words))}
 
 	required_fields=['pno','text','sorted_text','rawcites']
-	sel = get_selector(texts_already_ordered=texts_already_ordered, fields=required_fields) if not is_cite else None
+	sel = get_selector(texts_already_ordered=False, fields=required_fields) if not is_cite else None
 
 	out_vect = [0 for i in range(up_to_n)]
 
