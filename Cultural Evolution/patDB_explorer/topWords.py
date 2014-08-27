@@ -160,7 +160,9 @@ def add_sh_vector(v1, v2):
 # ith term is the number of top i terms that patent shares with ANY
 # parent. if is_cite=false, instead of comparing a patent to each of its
 # C citations, it is compared to C random patents.
-def multip_sh_term_vect(child, up_to_n, is_cite, inc_pno=True):
+# ret_sh_indices is an option to returns the indices 0-(n-1) of the shared terms
+# in the child's top n
+def multip_sh_term_vect(child, up_to_n, is_cite, inc_pno=True, ret_sh_indices=False):
 	out_vect = [0 for i in range(up_to_n)]
 
 	ch_words = topNTerms(child, up_to_n)
@@ -191,6 +193,9 @@ def multip_sh_term_vect(child, up_to_n, is_cite, inc_pno=True):
 					ch_dict.pop(pw)
 	# now out_vect[i] is the number of terms that are shared when you look at the top i terms,
 	# but not if you only look at the top (i-1), so either 1 or 0.
+	# optional return
+	if ret_sh_indices: return [i for i in range(top_n) if out_vect[i] != 0]
+
 	# Now I change that so out_vect[i]=num terms shared with any parent among the top i terms.
 	for i in range(1, up_to_n):
 		out_vect[i] += out_vect[i-1]
@@ -626,6 +631,33 @@ def shared_term_ranks_by_pairs(num_pairs, top_n, citations = True, texts_already
 					# save the output by closing, reopening file
 					outf.close()
 					outf = open(fname + '.csv', 'a')
+	outf.close()
+
+# like above, but multiparental in the spirit of multip_sh_term_vect
+def multip_shared_term_ranks(num_children, top_n, is_cite = True, texts_already_ordered = False, verbose = False, fname_suffix='', patCol_to_update=patns, write_freq = 1000, rand_cite=True):
+	
+	required_fields=['pno','text','sorted_text','rawcites']
+	sel = get_selector(texts_already_ordered=False, fields=required_fields) if not is_cite else None
+	ch_count = 0
+	fname = 'multip_sh_term_ranks_n=%d_numch=%d_%s-parents%s' % (top_n, num_children, 'cite' if is_cite else 'rand', fname_suffix)
+	outf = open(fname + '.csv', 'a')
+	def write_out(array, out):
+		out.write(','.join( map(str, array) ) + '\n')
+	
+	# saves the header
+	write_out(['ch_pno','par_pno2','ch_rank','par_rank'], outf)
+	
+	for i in range(num_children):
+		child = sel.rand_pat(enforce_func=randPat.has_sorted_text_rawcites)
+
+		sh_term_indices = multip_sh_term_vect(child, top_n, is_cite, ret_sh_indices=True)
+		for k in sh_term_indices:
+			write_out([child['pno'], k], outf)
+
+		if i % write_freq == 0:
+			# save the output by closing, reopening file
+			outf.close()
+			outf = open(fname + '.csv', 'a')
 	outf.close()
 
 
