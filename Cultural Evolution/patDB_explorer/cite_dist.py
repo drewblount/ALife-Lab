@@ -87,7 +87,7 @@ def all_cite_stats(samecoll=False):
 				in_collection = just_cites,
 				out_collection = just_cites,
 				# findArgs excludes patents already accounted for
-				findArgs = {'spec': {'age_diff':{'$exists':False}}}, 'fields': {'ctd':1,'src':1}},
+				findArgs = {'spec': {'age_diff':{'$exists':False}}, 'fields': {'ctd':1,'src':1}},
 				updateFreq=10000,
 				bSize=10000)
 
