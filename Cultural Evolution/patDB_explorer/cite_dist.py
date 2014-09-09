@@ -53,7 +53,7 @@ def prior_cites_to_parent(child, parent, pat_coll=cite_net):
 
 	if 'citedby' in parent:
 		# takes advantage of chronologicality of patent nums
-		older_than_child = [pno for pno in parent['citedby'] if pno < child]
+		older_than_child = [pno for pno in parent['citedby'] if pno < child] if 'citedby' in parent else []
 		return len(older_than_child)
 	# should this be a -1?
 	else:
