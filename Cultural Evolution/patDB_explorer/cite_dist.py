@@ -64,9 +64,7 @@ def tupleize(f1, f2):
 	def tuple_func(arg):
 		return (f1(arg), f2(arg))
 	return tuple_func
-
-		return (child_pno, parent_pno, age_diff(child_pno, parent_pno), prior_cites_to_parent(child_pno, parent_pno))
-
+		
 # returns update arg to set 'age_diff' and 'n_older_sibs' (= parents_prior_cites) fields
 def set_cite_stats(cite, samecoll=False):
 	child_pno = cite['src']
