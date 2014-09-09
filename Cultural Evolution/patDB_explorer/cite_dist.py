@@ -83,7 +83,7 @@ def set_cite_stats(cite, samecoll=False):
 def all_cite_stats(samecoll=False):
 #	def curried_citestats(cite):
 #		return set_cite_stats(cite, samecoll)
-	parallelMap(curried_citestats,
+	parallelMap(set_cite_stats,
 				in_collection = just_cites,
 				out_collection = just_cites,
 				findArgs = {'spec': {}, 'fields': {'_id':0}},
