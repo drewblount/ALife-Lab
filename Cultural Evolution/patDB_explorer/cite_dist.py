@@ -3,6 +3,7 @@ from pymongo import MongoClient
 patDB = MongoClient().patents
 patns = patDB.patns
 cite_net = patDB.cite_net
+just_cites = patDB.just_cites
 from parallelMap import parallelMap
 
 # current goal: procure an empirical distribution of
