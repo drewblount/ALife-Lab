@@ -86,7 +86,8 @@ def all_cite_stats(samecoll=False):
 	parallelMap(set_cite_stats,
 				in_collection = just_cites,
 				out_collection = just_cites,
-				findArgs = {'spec': {}, 'fields': {'ctd':1,'src':1}},
-				updateFreq=5000,
-				bSize=5000)
+				# findArgs excludes patents already accounted for
+				findArgs = {'spec': {'age_diff':{'$exists':False}}}, 'fields': {'ctd':1,'src':1}},
+				updateFreq=10000,
+				bSize=10000)
 
