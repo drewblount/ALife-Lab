@@ -64,7 +64,7 @@ def tupleize(f1, f2):
 	def tuple_func(arg):
 		return (f1(arg), f2(arg))
 	return tuple_func
-		
+
 # returns update arg to set 'age_diff' and 'n_older_sibs' (= parents_prior_cites) fields
 def set_cite_stats(cite, samecoll=False):
 	child_pno = cite['src']
@@ -75,7 +75,7 @@ def set_cite_stats(cite, samecoll=False):
 		parent = patns.find_one({'pno':parent_pno},{'isd':1,'pno':1,'cited_by':1,'_id':0})
 		return {'$set':{'age_diff': age_diff(child, parent), 'n_older_sibs': prior_cites_to_parent(child, parent, patns) } }
 	
-	else
+	else:
 		return {'$set': {'age_diff': age_diff(child_pno, parent_pno), 'n_older_sibs':prior_cites_to_parent(child_pno, parent_pno) } }
 
 # uses parallelMapInsert to store this data for all citations
