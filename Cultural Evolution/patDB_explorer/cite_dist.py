@@ -85,7 +85,7 @@ def all_cite_stats(samecoll=False):
 	parallelMap(curried_citestats,
 				in_collection = just_cites,
 				out_collection = just_cites,
-				findArgs = {'spec': {}, 'fields': {'_id':0}}
+				findArgs = {'spec': {}, 'fields': {'_id':0}},
 				updateFreq=5000,
 				bSize=5000)
 
