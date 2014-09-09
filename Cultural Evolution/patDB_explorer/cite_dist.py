@@ -12,7 +12,7 @@ from parallelMap import parallelMap
 
 def citestat_tuple(child, parent):
 	# input args can be patent numbers or patents themselves
-	if type(child) == int"
+	if type(child) == int:
 		# projection--which fields to return from db
 		proj = {'isd'}
 		child = patDB
