@@ -79,7 +79,7 @@ def set_cite_stats(cite, samecoll=False):
 		return {'$set': {'age_diff': age_diff(child_pno, parent_pno), 'n_older_sibs':prior_cites_to_parent(child_pno, parent_pno) } }
 
 # uses parallelMapInsert to store this data for all citations
-def all_cite_stats(samecoll=False)
+def all_cite_stats(samecoll=False):
 	def curried_citestats(cite):
 		return set_cite_stats(cite, samecoll)
 	parallelMap(curried_citestats,
