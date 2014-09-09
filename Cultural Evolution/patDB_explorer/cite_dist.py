@@ -12,7 +12,7 @@ from parallelMap import parallelMap
 
 def citestat_tuple(child, parent):
 	# input args can be patent numbers or patents themselves
-	if type(child) == int
+	if type(child) == int"
 		# projection--which fields to return from db
 		proj = {'isd'}
 		child = patDB
@@ -67,7 +67,7 @@ def tupleize(f1, f2):
 
 		return (child_pno, parent_pno, age_diff(child_pno, parent_pno), prior_cites_to_parent(child_pno, parent_pno))
 
-# returns update arg to set 'age_diff' and 'child_num' (= parents_prior_cites) fields
+# returns update arg to set 'age_diff' and 'n_older_sibs' (= parents_prior_cites) fields
 def set_cite_stats(cite, samecoll=False):
 	child_pno = cite['src']
 	parent_pno = cite['ctd']
@@ -75,10 +75,10 @@ def set_cite_stats(cite, samecoll=False):
 	if samecoll:
 		child = patns.find_one({'pno':child_pno},{'isd':1,'pno':1,'_id':0})
 		parent = patns.find_one({'pno':parent_pno},{'isd':1,'pno':1,'cited_by':1,'_id':0})
-		return {'$set':{'age_diff': age_diff(child, parent), 'child_num': prior_cites_to_parent(child, parent, patns) } }
+		return {'$set':{'age_diff': age_diff(child, parent), 'n_older_sibs': prior_cites_to_parent(child, parent, patns) } }
 	
 	else
-		return {'$set': {'age_diff': age_diff(child_pno, parent_pno), 'child_num':prior_cites_to_parent(child_pno, parent_pno) } }
+		return {'$set': {'age_diff': age_diff(child_pno, parent_pno), 'n_older_sibs':prior_cites_to_parent(child_pno, parent_pno) } }
 
 # uses parallelMapInsert to store this data for all citations
 def all_cite_stats(samecoll=False)
