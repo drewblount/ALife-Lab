@@ -81,8 +81,8 @@ def set_cite_stats(cite, samecoll=False):
 
 # uses parallelMapInsert to store this data for all citations
 def all_cite_stats(samecoll=False):
-	def curried_citestats(cite):
-		return set_cite_stats(cite, samecoll)
+#	def curried_citestats(cite):
+#		return set_cite_stats(cite, samecoll)
 	parallelMap(curried_citestats,
 				in_collection = just_cites,
 				out_collection = just_cites,
