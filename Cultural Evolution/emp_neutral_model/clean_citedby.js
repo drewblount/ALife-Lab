@@ -7,3 +7,7 @@ function clean(entry) {
 	db.cite_net.update( {_id : entry._id}, {$set: {citedby: clean_citedby, cleaned: true} } );
 	db.patns.update( {pno : entry._id}, {$set: {citedby: clean_citedby} } );
 }
+
+// in db = patents
+// limiting batch size because of recurring cursor timeout
+db.cite_net.find({cleaned:{$exists: false}},{cleaned:1,citedby:1}).batchSize(5000).forEach(clean)
