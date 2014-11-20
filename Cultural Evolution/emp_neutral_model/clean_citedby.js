@@ -11,3 +11,5 @@ function clean(entry) {
 // in db = patents
 // limiting batch size because of recurring cursor timeout
 db.cite_net.find({cleaned:{$exists: false}},{cleaned:1,citedby:1}).batchSize(5000).forEach(clean)
+
+db.cite_net.find({cleaned:{$exists: false}},{cleaned:1,citedby:1}).count()
