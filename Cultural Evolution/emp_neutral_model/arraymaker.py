@@ -40,7 +40,7 @@ def make_data_array(lim=None):
     #note: the below should get a cursor sorted ascending by agediff
     curs = raw_data.find({'_id':{'$gte':0}}).sort('_id',1)
     if lim:
-        curs
+        curs = raw_data.find({'_id':{'$gte':0}}).sort('_id',1).limit(lim)
     
     # weeknum makes sure that any holes in the data get fixed, i.e.,
     # if no empirical citation has a given agediff, there is no
