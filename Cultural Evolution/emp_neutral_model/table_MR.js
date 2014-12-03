@@ -6,14 +6,6 @@
 // key: ctd_age_in_days, value: assoc. array of {# prior cites : count}
 // so each age value will be an array of # prior cites counts.
 
-
-var map = function() {
-	if ('ctd_age_in_days' in this && 'prev_cites_to_ctd' in this) {
-		var prevs = this.prev_cites_to_ctd;
-		emit(this.ctd_age_in_days, {prevs:1});
-	}
-}
-
 // value is constructed weirdly so that its key is an integer, this.prev_cites_to_ctd
 var map = function() {
 	var value = {}
@@ -21,15 +13,6 @@ var map = function() {
 	emit(this.ctd_age_in_days, value);
 
 }
-
-var mapFunction2 = function() {
-                           var key = this.ctd_age_in_days;
-                           var value = {
-                                         count: 1,
-                                         qty: this.items[idx].qty
-                                       };
-                           emit(key, value);
-                    };
 
 //function reduce(ageKey, prev_count_dicts) {
 var reduce = function(ageKey, prev_count_dicts) {
