@@ -27,7 +27,7 @@ def dict_to_arr(D, arr_len=None):
     if not arr_len:
         # translate keys to integers (mongodb uses unicode)
         keys = map(int,D.keys())
-        arr_len = max(keys)
+        arr_len = max(keys)+1
         
     # note that since mongodb has unicode keys we have to switch from int/unicode
     arr = np.array([int(D[unicode(n)]) if unicode(n) in D.keys() else 0 for n in range(arr_len)])
