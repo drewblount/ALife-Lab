@@ -76,7 +76,7 @@ def make_data_array(lim=None):
     
     #note: below line should make each row in outarr the same length by padding
     # short rows with 0
-    out_arr = pad_with_zeroes(outarr)
+    out_arr = np.array(pad_with_zeroes(outarr))
     
     #note: make sure return type is how we want (numpy array)
     np.save('emp_neut_2darray.npy',out_arr)
