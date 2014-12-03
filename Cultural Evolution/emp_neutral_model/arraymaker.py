@@ -58,7 +58,7 @@ def make_data_array(lim=None):
         # that amount to the same agediff in weeks
         if thisweek < weeknum:
             #note: below line should element-wise add the two arrays
-            outarr[weeknum] = elementwise_add(outarr[weeknum],dict_to_arr(row_dict['value']))
+            outarr[thisweek] = elementwise_add(outarr[thisweek],dict_to_arr(row_dict['value']))
         
         else:
             # fills holes in the data with empty arrays
