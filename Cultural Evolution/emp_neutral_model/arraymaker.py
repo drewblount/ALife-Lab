@@ -52,7 +52,7 @@ def make_data_array(lim=None):
     for row_dict in curs:
         #note: make sure current data is in days, double checking the below conversion
         #note: make sure _id contains the agediff field
-        thisweek = row_dict['_id']//7
+        thisweek = int(row_dict['_id'])//7
         
         # if thisweek < rownum, that means there are multiple agediffs in days
         # that amount to the same agediff in weeks
