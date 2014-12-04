@@ -67,6 +67,7 @@ def make_data_array(lim=None):
                 outarr.append([0])
                 weeknum += 1
             #note: same as above
+            # this is where the work happens
             outarr.append(dict_to_arr(row_dict['value']))
             weeknum += 1
             
