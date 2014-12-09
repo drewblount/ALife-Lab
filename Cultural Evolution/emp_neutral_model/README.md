@@ -1,6 +1,10 @@
 EMPIRICAL NEUTRAL MODEL
 =======================
 
+.js files are scripts which were run on the mongo server to clean data.
+arraymaker.py was used to transpose the empirical data from the mongo
+db to a numpy array, which was saved as emp_neut_2darray.npy. The
+heatmapper functions are the scripts that generated the images.
 
 The goal here is to find two statistics for each citation in the patent network:
 
