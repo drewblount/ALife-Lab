@@ -2,6 +2,7 @@
 ## of patents per week in each week of the database.
 
 from pymongo import MongoClient
+from bson.code import Code
 import numpy as np
 
 patns = MongoClient().patents.patns
