@@ -8,7 +8,7 @@ week_data = MongoClient().patents.week_counter
 numweeks = 2003
 outarr = np.empty(numweeks)
 
-for week in week_data:
+for week in week_data.find():
     age = -int(week['_id'])
     outarr[age]=week['value']
     
