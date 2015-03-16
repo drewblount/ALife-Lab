@@ -16,7 +16,7 @@ def new_cite_net_entry(patn):
         
 def update_cite_net(from_collection = new_patns, a_cite_net = cite_net):
     parallelMapInsert(
-        func = new_cite_entry,
+        func = new_cite_net_entry,
         in_collection = from_collection,
         out_collection = a_acite_net,
 	    updateFreq = 10000,
