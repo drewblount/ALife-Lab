@@ -19,6 +19,7 @@ def update_cite_net(from_collection = new_patns, a_cite_net = cite_net):
         func = new_cite_net_entry,
         in_collection = from_collection,
         out_collection = a_cite_net,
+        findArgs = {'spec': {}, 'fields': {'rawcites' : 1, 'pno': 1} },
 	    updateFreq = 10000,
         bSize = 10000)
         
