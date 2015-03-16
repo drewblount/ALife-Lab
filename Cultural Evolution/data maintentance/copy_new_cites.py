@@ -29,8 +29,6 @@ def test_this_file():
     update_cite_net(new_patns, test_cite_net)
         
                     
-from copy_new_cites import *
-test_this_file()
 
         
         
