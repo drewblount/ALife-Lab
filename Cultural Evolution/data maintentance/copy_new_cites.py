@@ -10,7 +10,7 @@ new_patns = citeDB.new_patns
 
 def new_cite_net_entry(patn):
     if ('rawcites') in patn:
-        return {'_id': patn['pno'], 'rawcites': pat['rawcites'], 'citedby': []}
+        return {'_id': patn['pno'], 'rawcites': patn['rawcites'], 'citedby': []}
     else:
         return {'_id': patn['pno'], 'rawcites': [], 'citedby': []}
         
@@ -29,6 +29,8 @@ def test_this_file():
     update_cite_net(new_patns, test_cite_net)
         
                     
-        
+from copy_new_cites import *
+test_this_file()
+
         
         
