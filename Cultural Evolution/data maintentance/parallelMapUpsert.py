@@ -9,7 +9,7 @@ import random
 
 # Just like my tf-idf--pymongo/parallelMap.py, but takes the output of func
 # and inserts it into out_collection rather than updating in_collection
-def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{},'fields':{}}, bSize = -1, waitToFinish = True, updateFreq = 1, bulkOrdered = False, staggerThreads = True):
+def parallelMapUpsert(func, in_collection, out_collection, findArgs = {'spec':{},'fields':{}}, bSize = -1, waitToFinish = True, updateFreq = 1, bulkOrdered = False, staggerThreads = True):
 
 	# partFunc will be applied to each subset of the in_collection
 
@@ -65,7 +65,7 @@ def parallelMapInsert(func, in_collection, out_collection, findArgs = {'spec':{}
 			for item in cursor:
 				out = func(item)
 				if out:
-					out_collection.insert(out)
+					out_collection.update({'_id':out['_id']},out,{ upsert: true } )
 
 
 	# Adapted from Andy Buchanan's readPatnsFromFiles.py
